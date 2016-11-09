@@ -1,0 +1,8 @@
+prefix=/home/dev/ros_code/devel
+
+Name: apriltags_ros
+Description: Description of apriltags_ros
+Version: 0.1.2
+Cflags: -I/home/dev/ros_code/devel/include -I/home/dev/ros_code/src/apriltags_ros/apriltags_ros/include -I/usr/include/eigen3
+Libs: -L/home/dev/ros_code/devel/lib -lapriltag_detector
+Requires: apriltags image_transport roscpp sensor_msgs geometry_msgs tf cv_bridge message_runtime nodelet std_msgs

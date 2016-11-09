@@ -1,0 +1,8 @@
+prefix=/home/dev/ros_code/install
+
+Name: usb_cam
+Description: Description of usb_cam
+Version: 0.3.4
+Cflags: -I/home/dev/ros_code/install/include
+Libs: -L/home/dev/ros_code/install/lib -lusb_cam
+Requires: 
