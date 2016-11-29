@@ -153,24 +153,23 @@ void AprilTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg, const sens
 
     double x, y, z;
     Euler euler;
-    quatToEuler(rot_quaternion, euler);
+   // quatToEuler(rot_quaternion, euler);
 
-   // tf::Matrix3x3 m(rot);
-    //double roll, pitch, yaw;
-    //rot.getRPY(roll, pitch, yaw)
+    double roll, pitch, yaw;
+    rot_quaternion.getRPY(roll, pitch, yaw)
     geometry_msgs::PoseStamped tag_pose;
     tag_pose.pose.position.x = transform(0, 3);
     tag_pose.pose.position.y = transform(1, 3);
     tag_pose.pose.position.z = transform(2, 3);
-    /*
+    
     tag_pose.pose.orientation.x = pitch;
     tag_pose.pose.orientation.y = yaw;
     tag_pose.pose.orientation.z = roll;
-    */
+    /*
     tag_pose.pose.orientation.x = rot_quaternion.x();
     tag_pose.pose.orientation.y = rot_quaternion.y();
     tag_pose.pose.orientation.z = rot_quaternion.z();
-    tag_pose.pose.orientation.w = rot_quaternion.w();
+    tag_pose.pose.orientation.w = rot_quaternion.w();*/
     tag_pose.header = cv_ptr->header;
 
     AprilTagDetection tag_detection;
