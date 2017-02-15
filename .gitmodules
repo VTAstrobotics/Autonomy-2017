@@ -7,3 +7,6 @@
 [submodule "src/usb_cam"]
 	path = src/usb_cam
 	url = https://github.com/bosch-ros-pkg/usb_cam
+[submodule "src/robot_msgs"]
+	path = src/robot_msgs
+	url = https://github.com/VTAstrobotics/robot_msgs.git
