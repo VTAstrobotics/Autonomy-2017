@@ -1,6 +1,6 @@
 [submodule "src/apriltags_ros"]
 	path = src/apriltags_ros
-	url = https://github.com/VTAstrobotics/Autonomy-2017.git
+	url = https://github.com/VTAstrobotics/apriltags_ros.git
 [submodule "src/ethzasl_xsens_driver"]
 	path = src/ethzasl_xsens_driver
 	url = https://github.com/ethz-asl/ethzasl_xsens_driver.git
