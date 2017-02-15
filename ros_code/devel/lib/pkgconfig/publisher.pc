@@ -1,8 +1,0 @@
-prefix=/home/dev/ros_code/devel
-
-Name: publisher
-Description: Description of publisher
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/dev/ros_code/devel/lib 
-Requires: 

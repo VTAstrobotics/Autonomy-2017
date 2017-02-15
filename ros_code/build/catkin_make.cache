@@ -1,2 +1,0 @@
-apriltags_ros/apriltags:apriltags_ros/apriltags_ros:grid:publisher:test:usb_cam
--DCATKIN_DEVEL_PREFIX=/home/dev/ros_code/devel -DCMAKE_INSTALL_PREFIX=/home/dev/ros_code/install -G Unix Makefiles
