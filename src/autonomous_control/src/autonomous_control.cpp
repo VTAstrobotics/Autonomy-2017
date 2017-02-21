@@ -3,10 +3,6 @@
 #include <boost/foreach.hpp>
 #include <XmlRpcException.h>
 
-
-
-
-
 namespace autonomous_control{
 
 	AutonomousControl::AutonomousControl(ros::NodeHandle& nh)
