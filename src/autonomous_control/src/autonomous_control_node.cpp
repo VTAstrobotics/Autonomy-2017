@@ -9,6 +9,8 @@ int main(int argc, char **argv){
 	autonomous_control::AutonomousControl ATC(nh);
 	while(ros::ok()){
 		ros::spinOnce();
+		ros::Rate rate(5);
+		rate.sleep();
 		ATC.primary();
 	}
 	
