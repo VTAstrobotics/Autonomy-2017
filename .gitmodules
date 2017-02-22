@@ -10,3 +10,6 @@
 [submodule "src/robot_msgs"]
 	path = src/robot_msgs
 	url = https://github.com/VTAstrobotics/robot_msgs.git
+[submodule "src/rosserial"]
+	path = src/rosserial
+	url = https://github.com/ros-drivers/rosserial
