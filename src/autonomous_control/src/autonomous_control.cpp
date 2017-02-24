@@ -2,6 +2,8 @@
 #include <autonomous_control/autonomous_control.h>
 #include <boost/foreach.hpp>
 #include <XmlRpcException.h>
+#include <ros/console.h>
+#include <log4cxx/logger.h>
 
 namespace autonomous_control{
 
@@ -12,6 +14,11 @@ namespace autonomous_control{
 
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("convertedImu", 1, &AutonomousControl::getImu,this);
+
+		ROSCONSOLE_AUTOINIT;
+		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
+		my_logger->setLevel(ros::console::g_level_lookup[ros::console::levels::Debug]);
+		ROS_DEBUG_ONCE("Starting Autonomous Control");	
 
 		/*motor_command.leftRatio = 0.0;
 		motor_command.rightRatio = 0.0;
@@ -62,6 +69,7 @@ namespace autonomous_control{
 				if(oW != 1.0){
 					motor_command.leftRatio=150;
 					motor_command.rightRatio=150;
+					ROS_DEBUG_ONCE("Looking for Target");
 				}
 				else{
 					halt();
@@ -101,6 +109,7 @@ namespace autonomous_control{
 							}
 						}
 						state = DriveToCenter;
+						ROS_DEBUG_ONCE("I'm driving to the center");
 					break;
 					
 					case 1:
@@ -180,12 +189,15 @@ namespace autonomous_control{
 	void AutonomousControl::LOrR(){
 		if (posX < -0.5) {     //left
 			LorR = -1;
+			ROS_DEBUG_ONCE("I'm on the left");
 		}
 		else if (posX > 0.5) { //right
 			LorR = 1;
+			ROS_DEBUG_ONCE("I'm on the right");
 		}
 		else {          //center
 			LorR = 0;
+			ROS_DEBUG_ONCE("I'm already at the center");
 		}
 	}
 
