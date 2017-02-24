@@ -67,15 +67,17 @@ namespace autonomous_control{
 		switch(state){
 			case FindBeacon:
 				if(oW != 1.0){
-					motor_command.leftRatio=150;
-					motor_command.rightRatio=150;
+					motor_command.leftRatio=115;
+					motor_command.rightRatio=115;
 					ROS_DEBUG_ONCE("Looking for Target");
 				}
 				else{
 					halt();
+					ros::Duration(2.0).sleep(); // sleep for two seconds
 					LOrR();
 					turn = true;
 					state=Orient90;
+					ROS_DEBUG_ONCE("Found Target");
 				}
 			break;
 
@@ -90,22 +92,22 @@ namespace autonomous_control{
 						if ( oZ < 270 - 3 && oZ > 90) {
 							target90L(270 - oZ);
 							if(oZ > targetAng){
-								motor_command.rightRatio = 30;
-								motor_command.leftRatio = 30;
+								motor_command.rightRatio = 65;
+								motor_command.leftRatio = 65;
 							}
 						}
 						else if ( oZ > 270 + 3) {
 							target90R(oZ - 180);
 							if(oZ < targetAng){
-								motor_command.rightRatio = 150;
-								motor_command.leftRatio = 150;
+								motor_command.rightRatio = 115;
+								motor_command.leftRatio = 115;
 							}
 						}
 						else if (oZ < 90) {
 							target90R(90 - oZ);
 							if(oZ < targetAng){
-								motor_command.rightRatio = 150;
-								motor_command.leftRatio = 150;
+								motor_command.rightRatio = 115;
+								motor_command.leftRatio = 115;
 							}
 						}
 						state = DriveToCenter;
@@ -116,22 +118,22 @@ namespace autonomous_control{
 						if ( oZ < 270 && oZ > 90 + 3) {
 							target90R(oZ - 90);
 							if(oZ < targetAng){
-								motor_command.rightRatio = 150;
-								motor_command.leftRatio = 150;
+								motor_command.rightRatio = 115;
+								motor_command.leftRatio = 115;
 							}
 						}
 						else if ( oZ > 270) {
 							target90L(oZ - 180);
 							if(oZ > targetAng){
-								motor_command.rightRatio = 30;
-								motor_command.leftRatio = 30;
+								motor_command.rightRatio = 65;
+								motor_command.leftRatio = 65;
 							}
 						}
 						else if (oZ < 90 - 3) {
 							target90L(90 - oZ);
 							if(oZ > targetAng){
-								motor_command.rightRatio = 30;
-								motor_command.leftRatio = 30;
+								motor_command.rightRatio = 65;
+								motor_command.leftRatio = 65;
 							}
 						}
 						state = DriveToCenter;
@@ -187,11 +189,11 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::LOrR(){
-		if (posX < -0.5) {     //left
+		if (posX < -0.25) {     //left
 			LorR = -1;
 			ROS_DEBUG_ONCE("I'm on the left");
 		}
-		else if (posX > 0.5) { //right
+		else if (posX > 0.25) { //right
 			LorR = 1;
 			ROS_DEBUG_ONCE("I'm on the right");
 		}
