@@ -82,7 +82,7 @@ namespace autonomous_control{
 			break;
 
 			case Orient90:
-				
+				ROS_DEBUG_ONCE("Turning towards center");
 				switch (LorR) {
 					case 0:
 						state=Orient180;
@@ -95,12 +95,20 @@ namespace autonomous_control{
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
 							}
+							else{
+								halt();
+								state = DriveToCenter;
+							}
 						}
 						else if ( oZ > 270 + 3) {
 							target90R(oZ - 180);
 							if(oZ < targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
+							}
+							else{
+								halt();
+								state = DriveToCenter;
 							}
 						}
 						else if (oZ < 90) {
@@ -109,9 +117,11 @@ namespace autonomous_control{
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
 							}
+							else{
+								halt();
+								state = DriveToCenter;
+							}
 						}
-						state = DriveToCenter;
-						ROS_DEBUG_ONCE("I'm driving to the center");
 					break;
 					
 					case 1:
@@ -121,12 +131,20 @@ namespace autonomous_control{
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
 							}
+							else{
+								halt();
+								state = DriveToCenter;
+							}
 						}
 						else if ( oZ > 270) {
 							target90L(oZ - 180);
 							if(oZ > targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
+							}
+							else{
+								halt();
+								state = DriveToCenter;
 							}
 						}
 						else if (oZ < 90 - 3) {
@@ -135,28 +153,55 @@ namespace autonomous_control{
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
 							}
+							else{
+								halt();
+								state = DriveToCenter;
+							}
 						}
-						state = DriveToCenter;
 					break;
 				}
 			break;
 
 			case DriveToCenter:
-				halt();
-				state=Orient180;
+				ROS_DEBUG_ONCE("I'm driving to the center");
+				if(posX < -0.2 || posX > 0.2){
+					motor_command.rightRatio=65;
+					motor_command.leftRatio=115;
+				}
+				else{
+					halt();
+					state=Orient180;
+				}
 			break;
 
 			case Orient180:
-				halt();
-				state=DriveToMine;
+				ROS_DEBUG_ONCE("Turning down range");
+				if(oZ < 177){
+
+				}
+				else if(oZ > 183){
+
+				}
+				else{
+					halt();
+					state=DriveToMine;
+				}
 			break;
 
 			case DriveToMine:
-				halt();
-				state=Halt;
+				ROS_DEBUG_ONCE("Driving to Mine");
+				if(posY < 3.0){
+					motor_command.rightRatio=65;
+					motor_command.leftRatio=115;
+				}
+				else{
+					halt();
+					state=Halt;
+				}
 			break;
 
 			case Halt:
+				ROS_DEBUG_ONCE("HALT!");
 				halt();
 			break;
 			
