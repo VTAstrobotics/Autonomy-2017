@@ -10,7 +10,7 @@ namespace autonomous_control{
 	AutonomousControl::AutonomousControl(ros::NodeHandle& nh)
 	{
 		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);
-		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/motor_command",1);
+		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1);
 
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("convertedImu", 1, &AutonomousControl::getImu,this);
