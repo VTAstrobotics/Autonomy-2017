@@ -18,7 +18,7 @@ namespace autonomous_control{
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
 		my_logger->setLevel(ros::console::g_level_lookup[ros::console::levels::Debug]);
-		ROS_DEBUG_ONCE("Starting Autonomous Control");	
+		
 
 		/*motor_command.leftRatio = 0.0;
 		motor_command.rightRatio = 0.0;
@@ -41,6 +41,8 @@ namespace autonomous_control{
 		imuW=0.0;
 		state = FindBeacon;
 		LorR = 0;
+		ros::Duration(3.0).sleep();
+		ROS_DEBUG_ONCE("Starting Autonomous Control");	
 	}
 
 	void AutonomousControl::tag_seen(const apriltags_ros::MetaPose& pose){
@@ -81,8 +83,7 @@ namespace autonomous_control{
 				}
 			break;
 
-			case Orient90:
-				ROS_DEBUG_ONCE("Turning towards center");
+			case Orient90:				
 				switch (LorR) {
 					case 0:
 						state=Orient180;
@@ -91,6 +92,7 @@ namespace autonomous_control{
 					case -1:
 						if ( oZ < 270 - 3 && oZ > 90) {
 							target90L(270 - oZ);
+							ROS_DEBUG_ONCE("Turning Left");
 							if(oZ > targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
@@ -102,6 +104,7 @@ namespace autonomous_control{
 						}
 						else if ( oZ > 270 + 3) {
 							target90R(oZ - 180);
+							ROS_DEBUG_ONCE("Turning Right");
 							if(oZ < targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
@@ -112,6 +115,7 @@ namespace autonomous_control{
 							}
 						}
 						else if (oZ < 90) {
+							ROS_DEBUG_ONCE("Turning Right");
 							target90R(90 - oZ);
 							if(oZ < targetAng){
 								motor_command.rightRatio = 115;
@@ -124,9 +128,10 @@ namespace autonomous_control{
 						}
 					break;
 					
-					case 1:
+					case 1:						
 						if ( oZ < 270 && oZ > 90 + 3) {
 							target90R(oZ - 90);
+							ROS_DEBUG_ONCE("Turning Right");
 							if(oZ < targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
@@ -138,6 +143,7 @@ namespace autonomous_control{
 						}
 						else if ( oZ > 270) {
 							target90L(oZ - 180);
+							ROS_DEBUG_ONCE("Turning Left");
 							if(oZ > targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
@@ -149,6 +155,7 @@ namespace autonomous_control{
 						}
 						else if (oZ < 90 - 3) {
 							target90L(90 - oZ);
+							ROS_DEBUG_ONCE("Turning Left");
 							if(oZ > targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
@@ -229,6 +236,7 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::halt(){
+		ROS_DEBUG_ONCE("Halt Command Called");
 		motor_command.leftRatio=90;
 		motor_command.rightRatio=90;
 	}
@@ -236,11 +244,11 @@ namespace autonomous_control{
 	void AutonomousControl::LOrR(){
 		if (posX < -0.25) {     //left
 			LorR = -1;
-			ROS_DEBUG_ONCE("I'm on the left");
+			ROS_DEBUG_ONCE("I'm on the right (negative x)");
 		}
 		else if (posX > 0.25) { //right
 			LorR = 1;
-			ROS_DEBUG_ONCE("I'm on the right");
+			ROS_DEBUG_ONCE("I'm on the left (positive x)");
 		}
 		else {          //center
 			LorR = 0;
