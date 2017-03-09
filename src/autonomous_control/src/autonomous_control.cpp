@@ -39,8 +39,12 @@ namespace autonomous_control{
 		imuY=0.0;
 		imuZ=0.0;
 		imuW=0.0;
+		prevZ=0.0;
 		state = FindBeacon;
 		LorR = 0;
+		numRot = 0;
+		imuForward = 0;
+		faceForward = false;  // bool used to check whether bot is facing forward
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
 	}
@@ -62,7 +66,7 @@ namespace autonomous_control{
 		imuX=imu.orientation.x;
 		imuY=imu.orientation.y;
 		imuZ=imu.orientation.z;
-		imuW=imu.orientation.w;
+		imuW=imu.orientation.w;		
 	}
 
 	void AutonomousControl::primary(){
@@ -76,10 +80,12 @@ namespace autonomous_control{
 				else{
 					halt();
 					ros::Duration(2.0).sleep(); // sleep for two seconds
+					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
 					state=Orient90;
 					ROS_DEBUG_ONCE("Found Target");
+					tempZ = imuZ;  //Store IMU Angle at halt
 				}
 			break;
 
@@ -92,8 +98,8 @@ namespace autonomous_control{
 					case -1:
 						if ( oZ < 270 - 3 && oZ > 90) {
 							target90L(270 - oZ);
-							ROS_DEBUG_ONCE("Turning Left");
-							if(oZ > targetAng){
+							ROS_DEBUG_ONCE("Turning Left 1");
+							if(newZ < targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
 							}
@@ -104,8 +110,8 @@ namespace autonomous_control{
 						}
 						else if ( oZ > 270 + 3) {
 							target90R(oZ - 180);
-							ROS_DEBUG_ONCE("Turning Right");
-							if(oZ < targetAng){
+							ROS_DEBUG_ONCE("Turning Right 2");
+							if(newZ > targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
 							}
@@ -115,9 +121,9 @@ namespace autonomous_control{
 							}
 						}
 						else if (oZ < 90) {
-							ROS_DEBUG_ONCE("Turning Right");
+							ROS_DEBUG_ONCE("Turning Right 3");
 							target90R(90 - oZ);
-							if(oZ < targetAng){
+							if(newZ > targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
 							}
@@ -131,8 +137,8 @@ namespace autonomous_control{
 					case 1:						
 						if ( oZ < 270 && oZ > 90 + 3) {
 							target90R(oZ - 90);
-							ROS_DEBUG_ONCE("Turning Right");
-							if(oZ < targetAng){
+							ROS_DEBUG_ONCE("Turning Right 4");
+							if(newZ > targetAng){
 								motor_command.rightRatio = 115;
 								motor_command.leftRatio = 115;
 							}
@@ -143,8 +149,8 @@ namespace autonomous_control{
 						}
 						else if ( oZ > 270) {
 							target90L(oZ - 180);
-							ROS_DEBUG_ONCE("Turning Left");
-							if(oZ > targetAng){
+							ROS_DEBUG_ONCE("Turning Left 5");
+							if(newZ < targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
 							}
@@ -155,8 +161,8 @@ namespace autonomous_control{
 						}
 						else if (oZ < 90 - 3) {
 							target90L(90 - oZ);
-							ROS_DEBUG_ONCE("Turning Left");
-							if(oZ > targetAng){
+							ROS_DEBUG_ONCE("Turning Left 6");
+							if(newZ < targetAng){
 								motor_command.rightRatio = 65;
 								motor_command.leftRatio = 65;
 							}
@@ -182,16 +188,29 @@ namespace autonomous_control{
 			break;
 
 			case Orient180:
-				ROS_DEBUG_ONCE("Turning down range");
 				if(oZ < 177){
-
-				}
-				else if(oZ > 183){
-
-				}
-				else{
+					if(newZ < targetAng){
+					ROS_DEBUG_ONCE("Turning Left to Face Forward");
+					target180(180-oZ);
+					motor_command.rightRatio = 65;
+					motor_command.rightRatio = 65;
+					}
+					else{
 					halt();
 					state=DriveToMine;
+					}
+				}
+				else if(oZ > 183) {
+					if(newZ > targetAng){
+					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
+					target180(180-oZ);
+					motor_command.rightRatio = 115;
+					motor_command.rightRatio = 115;
+					}
+					else{
+					halt();
+					state=DriveToMine;
+					}
 				}
 			break;
 
@@ -257,20 +276,51 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::target90R(float desired){
+		updateIMU();
 		if(turn){
-			targetAng = imuZ - desired;
+			targetAng = newZ - desired;
 		}
 		turn = false;
 	}
 
 	void AutonomousControl::target90L(float desired){
+		updateIMU();
 		if(turn){
-			targetAng = imuZ + desired;
+			targetAng = newZ + desired;
+			ROS_DEBUG_STREAM("Target angle " << targetAng);
 		}
 		turn = false;
 	}
 
-	void AutonomousControl::target180(float desired){
+	void AutonomousControl::updateIMU(){
+		prevZ = tempZ -360*numRot;
+		tempZ = imuZ;
+		
 
+
+		if ((prevZ >= 270.00 && prevZ <= 360.00)&&(tempZ>=0.0 && tempZ <=90.0)) {
+			numRot = numRot+1;
+			newZ = tempZ + 360*numRot;
+			ROS_DEBUG_ONCE("IMU positive turn over");
+		}
+		else if ((prevZ <=90.0 && prevZ>=0.0)&&(tempZ<=360 && tempZ >=270)) {
+			numRot = numRot -1;
+			newZ = tempZ + 360*numRot;
+			ROS_DEBUG_ONCE("IMU negative turn over");
+		}
+		else{
+			newZ = tempZ + 360*numRot;			
+		}
+		ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
+	}
+
+	void AutonomousControl::target180(float desired){
+		updateIMU();
+		if(!faceForward){
+			targetAng = newZ + desired;
+			ROS_DEBUG_STREAM("Turning Forward by " << targetAng);
+		}
+		faceForward = true;
+		
 	}
 }
