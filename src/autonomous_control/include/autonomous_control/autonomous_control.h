@@ -18,6 +18,7 @@ namespace autonomous_control{
 		void halt();
 	private:
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward;
+		float forwardRatio, backwardRatio, brake;
 		bool detected, turn, faceForward;
 		robot_msgs::Autonomy motor_command;
 		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToMine, Halt} machineState;

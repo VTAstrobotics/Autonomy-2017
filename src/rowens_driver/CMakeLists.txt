@@ -115,11 +115,19 @@ catkin_package(
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  VESC_BBB_UART
 )
 
 ## Declare a C++ library
 add_library(rowens_driver
   src/rowens_driver.cpp
+  VESC_BBB_UART/bldc.cpp
+  VESC_BBB_UART/bldc_interface.c
+  VESC_BBB_UART/bldc_interface_uart.c
+  VESC_BBB_UART/buffer.c
+  VESC_BBB_UART/comm_uart.c
+  VESC_BBB_UART/crc.c
+  VESC_BBB_UART/packet.c
 )
 
 target_link_libraries(rowens_driver
@@ -136,7 +144,7 @@ add_executable(rowens_driver_node src/rowens_driver_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(rowens_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(rowens_driver_node )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(rowens_driver_node

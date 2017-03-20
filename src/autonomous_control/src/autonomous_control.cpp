@@ -45,6 +45,11 @@ namespace autonomous_control{
 		numRot = 0;
 		imuForward = 0;
 		faceForward = false;  // bool used to check whether bot is facing forward
+
+		forwardRatio = 0.5; 
+		backwardRatio = 0.5; 
+		brake = 0.0;
+
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
 	}
@@ -73,8 +78,8 @@ namespace autonomous_control{
 		switch(state){
 			case FindBeacon:
 				if(oW != 1.0){
-					motor_command.leftRatio=115;
-					motor_command.rightRatio=115;
+					motor_command.leftRatio=forwardRatio;
+					motor_command.rightRatio=backwardRatio;
 					ROS_DEBUG_ONCE("Looking for Target");
 				}
 				else{
@@ -100,8 +105,8 @@ namespace autonomous_control{
 							target90L(270 - oZ);
 							ROS_DEBUG_ONCE("Turning Left 1");
 							if(newZ < targetAng){
-								motor_command.rightRatio = 65;
-								motor_command.leftRatio = 65;
+								motor_command.rightRatio = forwardRatio;
+								motor_command.leftRatio = backwardRatio;
 							}
 							else{
 								halt();
@@ -112,8 +117,8 @@ namespace autonomous_control{
 							target90R(oZ - 180);
 							ROS_DEBUG_ONCE("Turning Right 2");
 							if(newZ > targetAng){
-								motor_command.rightRatio = 115;
-								motor_command.leftRatio = 115;
+								motor_command.rightRatio = backwardRatio;
+								motor_command.leftRatio = forwardRatio;
 							}
 							else{
 								halt();
@@ -124,8 +129,8 @@ namespace autonomous_control{
 							ROS_DEBUG_ONCE("Turning Right 3");
 							target90R(90 - oZ);
 							if(newZ > targetAng){
-								motor_command.rightRatio = 115;
-								motor_command.leftRatio = 115;
+								motor_command.rightRatio = backwardRatio;
+								motor_command.leftRatio = forwardRatio;
 							}
 							else{
 								halt();
@@ -139,8 +144,8 @@ namespace autonomous_control{
 							target90R(oZ - 90);
 							ROS_DEBUG_ONCE("Turning Right 4");
 							if(newZ > targetAng){
-								motor_command.rightRatio = 115;
-								motor_command.leftRatio = 115;
+								motor_command.rightRatio = backwardRatio;
+								motor_command.leftRatio = forwardRatio;
 							}
 							else{
 								halt();
@@ -151,8 +156,8 @@ namespace autonomous_control{
 							target90L(oZ - 180);
 							ROS_DEBUG_ONCE("Turning Left 5");
 							if(newZ < targetAng){
-								motor_command.rightRatio = 65;
-								motor_command.leftRatio = 65;
+								motor_command.rightRatio = forwardRatio;
+								motor_command.leftRatio = backwardRatio;
 							}
 							else{
 								halt();
@@ -163,8 +168,8 @@ namespace autonomous_control{
 							target90L(90 - oZ);
 							ROS_DEBUG_ONCE("Turning Left 6");
 							if(newZ < targetAng){
-								motor_command.rightRatio = 65;
-								motor_command.leftRatio = 65;
+								motor_command.rightRatio = forwardRatio;
+								motor_command.leftRatio = backwardRatio;
 							}
 							else{
 								halt();
@@ -178,8 +183,8 @@ namespace autonomous_control{
 			case DriveToCenter:
 				ROS_DEBUG_ONCE("I'm driving to the center");
 				if(posX < -0.2 || posX > 0.2){
-					motor_command.rightRatio=65;
-					motor_command.leftRatio=115;
+					motor_command.rightRatio=forwardRatio;
+					motor_command.leftRatio=forwardRatio;
 				}
 				else{
 					halt();
@@ -192,8 +197,8 @@ namespace autonomous_control{
 					if(newZ < targetAng){
 					ROS_DEBUG_ONCE("Turning Left to Face Forward");
 					target180(180-oZ);
-					motor_command.rightRatio = 65;
-					motor_command.rightRatio = 65;
+					motor_command.rightRatio = forwardRatio;
+					motor_command.leftRatio = backwardRatio;
 					}
 					else{
 					halt();
@@ -204,8 +209,8 @@ namespace autonomous_control{
 					if(newZ > targetAng){
 					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
 					target180(180-oZ);
-					motor_command.rightRatio = 115;
-					motor_command.rightRatio = 115;
+					motor_command.rightRatio = backwardRatio;
+					motor_command.leftRatio = forwardRatio;
 					}
 					else{
 					halt();
@@ -217,8 +222,8 @@ namespace autonomous_control{
 			case DriveToMine:
 				ROS_DEBUG_ONCE("Driving to Mine");
 				if(posY < 3.0){
-					motor_command.rightRatio=65;
-					motor_command.leftRatio=115;
+					motor_command.rightRatio=forwardRatio;
+					motor_command.leftRatio=forwardRatio;
 				}
 				else{
 					halt();
@@ -256,8 +261,8 @@ namespace autonomous_control{
 
 	void AutonomousControl::halt(){
 		ROS_DEBUG_ONCE("Halt Command Called");
-		motor_command.leftRatio=90;
-		motor_command.rightRatio=90;
+		motor_command.leftRatio=brake;
+		motor_command.rightRatio=brake;
 	}
 
 	void AutonomousControl::LOrR(){
