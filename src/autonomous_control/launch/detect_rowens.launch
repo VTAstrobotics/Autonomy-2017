@@ -153,7 +153,7 @@
 
     <arg name="frame_local" default="ENU"/>
 
-  <!--
+  
   <node pkg="xsens_driver" type="mtnode.py" name="xsens_driver" output="screen" respawn="true">
     <param name="frame_id" value="$(arg frame_id)"/>
     <param name="frame_local" value="$(arg frame_local)"/>
@@ -168,7 +168,7 @@
     name="quat2euler"
     respawn = "true"
   />
-  -->
+  
 
   <node
     pkg="cam_data_filter"
