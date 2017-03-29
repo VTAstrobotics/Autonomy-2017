@@ -11,9 +11,13 @@ namespace autonomous_control{
 	{
 		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);
 		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1);
+		cali_command_ = nh.advertise<std_msgs::Bool>("cali_command",1);
+		scan_command_ = nh.advertise<std_msgs::Empty>("scan_command", 1);
+		nuc_sync_ = nh.advertise<std_msgs::Bool>("nucSync",1);
 
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("convertedImu", 1, &AutonomousControl::getImu,this);
+		syncSub = nh.subscribe("synced", 1, &AutonomousControl::synced,this);
 
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
@@ -47,11 +51,14 @@ namespace autonomous_control{
 		faceForward = false;  // bool used to check whether bot is facing forward
 
 		forwardRatio = 0.5; 
-		backwardRatio = 0.5; 
+		backwardRatio = -0.5; 
 		brake = 0.0;
+
+		nuc_sync.data = false;
 
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
+
 	}
 
 	void AutonomousControl::tag_seen(const apriltags_ros::MetaPose& pose){
@@ -65,6 +72,7 @@ namespace autonomous_control{
 		pX = pose.px;
 		pY = pose.py;
 		detected = pose.detected;
+		cali.data=true;
 	}
 
 	void AutonomousControl::getImu(const sensor_msgs::Imu& imu){
@@ -74,13 +82,26 @@ namespace autonomous_control{
 		imuW=imu.orientation.w;		
 	}
 
+	void AutonomousControl::synced(const std_msgs::Bool& val){
+		if(!val.data){
+			nuc_sync.data = true;
+			nuc_sync_.publish(nuc_sync);
+		}
+		else{
+			ROS_DEBUG_ONCE("Arduino Synced");
+		}
+	}
+
 	void AutonomousControl::primary(){
 		switch(state){
 			case FindBeacon:
 				if(oW != 1.0){
 					motor_command.leftRatio=forwardRatio;
 					motor_command.rightRatio=backwardRatio;
+					cali_command_.publish(cali);
+					cali.data=false;
 					ROS_DEBUG_ONCE("Looking for Target");
+					ROS_DEBUG_ONCE("Calibrating lidar");
 				}
 				else{
 					halt();
@@ -226,6 +247,7 @@ namespace autonomous_control{
 					motor_command.leftRatio=forwardRatio;
 				}
 				else{
+					scan_command_.publish(empty);
 					halt();
 					state=Halt;
 				}

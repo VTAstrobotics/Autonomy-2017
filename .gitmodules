@@ -13,3 +13,9 @@
 [submodule "src/rosserial"]
 	path = src/rosserial
 	url = https://github.com/ros-drivers/rosserial
+[submodule "src/rowens_driver/vesc_bbb_uart"]
+	path = src/rowens_driver/vesc_bbb_uart
+	url = https://github.com/VTAstrobotics/VESC_BBB_UART.git
+[submodule "src/imu"]
+	path = src/imu
+	url = https://github.com/ccny-ros-pkg/imu_tools

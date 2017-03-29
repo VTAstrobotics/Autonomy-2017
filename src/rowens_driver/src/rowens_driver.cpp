@@ -15,7 +15,7 @@ namespace rowens_driver{
 		dumpCmd = 0.0;
 
 		
-		BLDC::init();
+		BLDC::init();	
 	}
 
 	void RowensDriver::cmd_recieved(const robot_msgs::Autonomy& cmd){
