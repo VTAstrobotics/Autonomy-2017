@@ -15,7 +15,7 @@ namespace rowens_driver{
 		dumpCmd = 0.0;
 
 		
-		BLDC::init();	
+		BLDC::init((char*)"dev/ttyVESC1");	
 	}
 
 	void RowensDriver::cmd_recieved(const robot_msgs::Autonomy& cmd){

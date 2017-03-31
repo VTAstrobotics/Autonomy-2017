@@ -153,7 +153,6 @@
 
     <arg name="frame_local" default="ENU"/>
 
-  <!--
   <node pkg="xsens_driver" type="mtnode.py" name="xsens_driver" output="screen" respawn="true">
     <param name="frame_id" value="$(arg frame_id)"/>
     <param name="frame_local" value="$(arg frame_local)"/>
@@ -162,13 +161,18 @@
     <param name="timeout" value="0.002"/>
   </node>
 
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="madgwick_filter" output="screen">
+    <remap from="imu/data" to="imu/data_madgwick"/>
+    <remap from="imu/data_raw" to="imu/data"/>
+    <param name="use_mag" type="bool" value="false"/>
+    </node>
+ 
   <node 
     pkg="quat2euler"
     type="quat2euler_node"
     name="quat2euler"
     respawn = "true"
   />
-  -->
 
   <node
     pkg="cam_data_filter"
@@ -184,7 +188,7 @@
     respawn="true"
     output="screen"
   />
-  
+  <!--
   <node
     pkg="rowens_driver"
     type="rowens_driver_node"
@@ -192,5 +196,5 @@
     required="true"
     output="screen"
   />
-
+-->
 </launch>
