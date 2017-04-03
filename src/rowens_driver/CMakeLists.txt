@@ -118,19 +118,19 @@ catkin_package(
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  VESC_BBB_UART
+  vesc_bbb_uart
 )
 
 ## Declare a C++ library
 add_library(rowens_driver
   src/rowens_driver.cpp
-  VESC_BBB_UART/bldc.cpp
-  VESC_BBB_UART/bldc_interface.c
-  VESC_BBB_UART/bldc_interface_uart.c
-  VESC_BBB_UART/buffer.c
-  VESC_BBB_UART/comm_uart.c
-  VESC_BBB_UART/crc.c
-  VESC_BBB_UART/packet.c
+  vesc_bbb_uart/bldc.cpp
+  vesc_bbb_uart/bldc_interface.c
+  vesc_bbb_uart/bldc_interface_uart.c
+  vesc_bbb_uart/buffer.c
+  vesc_bbb_uart/comm_uart.c
+  vesc_bbb_uart/crc.c
+  vesc_bbb_uart/packet.c
 )
 
 target_link_libraries(rowens_driver

@@ -6,7 +6,7 @@
 namespace quat2euler{
 	Quat2Euler::Quat2Euler(ros::NodeHandle& nh)
 	{
-		convert_pub = nh.advertise<sensor_msgs::Imu>("/convertedImu",1);
+		convert_pub = nh.advertise<sensor_msgs::Imu>("imu/converted",1);
 		sub = nh.subscribe("/imu/data_madgwick",1,&Quat2Euler::convert,this);
 	}
 	void Quat2Euler::convert(const sensor_msgs::Imu& imu){

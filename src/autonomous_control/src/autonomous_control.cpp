@@ -12,12 +12,9 @@ namespace autonomous_control{
 		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);
 		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1);
 		cali_command_ = nh.advertise<std_msgs::Bool>("cali_command",1);
-		scan_command_ = nh.advertise<std_msgs::Empty>("scan_command", 1);
-		nuc_sync_ = nh.advertise<std_msgs::Bool>("nucSync",1);
 
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
-		imuSub = nh.subscribe("convertedImu", 1, &AutonomousControl::getImu,this);
-		syncSub = nh.subscribe("synced", 1, &AutonomousControl::synced,this);
+		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this);
 
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
@@ -50,11 +47,9 @@ namespace autonomous_control{
 		imuForward = 0;
 		faceForward = false;  // bool used to check whether bot is facing forward
 
-		forwardRatio = 0.5; 
-		backwardRatio = -0.5; 
+		forwardRatio = 0.2; 
+		backwardRatio = -0.2; 
 		brake = 0.0;
-
-		nuc_sync.data = false;
 
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
@@ -73,6 +68,7 @@ namespace autonomous_control{
 		pY = pose.py;
 		detected = pose.detected;
 		cali.data=true;
+		ROS_INFO_STREAM("Field Position is x = " << posX << ",  y = " << posY);
 	}
 
 	void AutonomousControl::getImu(const sensor_msgs::Imu& imu){
@@ -80,16 +76,6 @@ namespace autonomous_control{
 		imuY=imu.orientation.y;
 		imuZ=imu.orientation.z;
 		imuW=imu.orientation.w;		
-	}
-
-	void AutonomousControl::synced(const std_msgs::Bool& val){
-		if(!val.data){
-			nuc_sync.data = true;
-			nuc_sync_.publish(nuc_sync);
-		}
-		else{
-			ROS_DEBUG_ONCE("Arduino Synced");
-		}
 	}
 
 	void AutonomousControl::primary(){
@@ -105,101 +91,118 @@ namespace autonomous_control{
 				}
 				else{
 					halt();
+					updateTag();
+					updateIMU();
 					ros::Duration(2.0).sleep(); // sleep for two seconds
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
 					state=Orient90;
 					ROS_DEBUG_ONCE("Found Target");
+					ROS_DEBUG_STREAM("Tag angle " << oZ);
+					ROS_DEBUG_STREAM("IMU angle " << imuZ);
 					tempZ = imuZ;  //Store IMU Angle at halt
 				}
 			break;
-
-			case Orient90:				
-				switch (LorR) {
-					case 0:
-						state=Orient180;
-					break;
+			if (moveComplete = false) {
+				case Orient90:				
+					switch (LorR) {
+						case 0:
+							state=Orient180;
+						break;
 					
-					case -1:
-						if ( oZ < 270 - 3 && oZ > 90) {
-							target90L(270 - oZ);
-							ROS_DEBUG_ONCE("Turning Left 1");
-							if(newZ < targetAng){
-								motor_command.rightRatio = forwardRatio;
-								motor_command.leftRatio = backwardRatio;
+						case -1:
+							if ( oZStore < 270 - 3 && oZStore > 90) { //This works
+								//Right hand side, facing quadrant 1 or 2
+								target90L(270 - oZStore);
+								ROS_DEBUG_ONCE("Turning Left 1");
+								if(newZ < targetAng){
+									motor_command.rightRatio = forwardRatio;
+									motor_command.leftRatio = backwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
 							}
-							else{
-								halt();
-								state = DriveToCenter;
+							else if ( oZStore > 270 + 3) { //will likely never happen
+								// Right Hand side, facing quadrant 3
+								target90R(oZStore - 180);
+								ROS_DEBUG_ONCE("Turning Right 2");
+								if(newZ > targetAng){
+									motor_command.rightRatio = backwardRatio;
+									motor_command.leftRatio = forwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
 							}
-						}
-						else if ( oZ > 270 + 3) {
-							target90R(oZ - 180);
-							ROS_DEBUG_ONCE("Turning Right 2");
-							if(newZ > targetAng){
-								motor_command.rightRatio = backwardRatio;
-								motor_command.leftRatio = forwardRatio;
+							else if (oZStore < 90) { //This works 4/3
+								ROS_DEBUG_ONCE("Turning Right 3");
+								// Right Hand Side, Facing Quadrant 4
+								target90R(90 + oZStore);
+								if(newZ > targetAng){
+									motor_command.rightRatio = backwardRatio;
+									motor_command.leftRatio = forwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
 							}
-							else{
-								halt();
-								state = DriveToCenter;
-							}
-						}
-						else if (oZ < 90) {
-							ROS_DEBUG_ONCE("Turning Right 3");
-							target90R(90 - oZ);
-							if(newZ > targetAng){
-								motor_command.rightRatio = backwardRatio;
-								motor_command.leftRatio = forwardRatio;
-							}
-							else{
-								halt();
-								state = DriveToCenter;
-							}
-						}
-					break;
+						break;
 					
-					case 1:						
-						if ( oZ < 270 && oZ > 90 + 3) {
-							target90R(oZ - 90);
-							ROS_DEBUG_ONCE("Turning Right 4");
-							if(newZ > targetAng){
-								motor_command.rightRatio = backwardRatio;
-								motor_command.leftRatio = forwardRatio;
+						case 1:						
+							if ( oZStore < 270 && oZStore > 90 + 3) { //this works
+								// Left hand side, facing Quadrant 1 or 2
+								target90R(oZStore - 90);
+								ROS_DEBUG_ONCE("Turning Right 4");
+								if(newZ > targetAng){
+									motor_command.rightRatio = backwardRatio;
+									motor_command.leftRatio = forwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
+							}	
+							else if ( oZStore> 270) {
+								// Left Hand Side, Facing Quadrant 3
+								target90L(450 - oZStore);
+								ROS_DEBUG_ONCE("Turning Left 5");
+								if(newZ < targetAng){
+									motor_command.rightRatio = forwardRatio;
+									motor_command.leftRatio = backwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
 							}
-							else{
-								halt();
-								state = DriveToCenter;
+							else if (oZStore < 90 - 3) {
+								// Left Hand Side, Facing Quadrant 4
+								target90L(90 - oZStore);
+								ROS_DEBUG_ONCE("Turning Left 6");
+								if(newZ < targetAng){
+									motor_command.rightRatio = forwardRatio;
+									motor_command.leftRatio = backwardRatio;
+								}
+								else{
+									halt();
+									state = DriveToCenter;
+									moveComplete = true;
+								}
 							}
+						break;
 						}
-						else if ( oZ > 270) {
-							target90L(oZ - 180);
-							ROS_DEBUG_ONCE("Turning Left 5");
-							if(newZ < targetAng){
-								motor_command.rightRatio = forwardRatio;
-								motor_command.leftRatio = backwardRatio;
-							}
-							else{
-								halt();
-								state = DriveToCenter;
-							}
-						}
-						else if (oZ < 90 - 3) {
-							target90L(90 - oZ);
-							ROS_DEBUG_ONCE("Turning Left 6");
-							if(newZ < targetAng){
-								motor_command.rightRatio = forwardRatio;
-								motor_command.leftRatio = backwardRatio;
-							}
-							else{
-								halt();
-								state = DriveToCenter;
-							}
-						}
-					break;
-				}
-			break;
+					}
+				break;
 
 			case DriveToCenter:
 				ROS_DEBUG_ONCE("I'm driving to the center");
@@ -215,9 +218,9 @@ namespace autonomous_control{
 
 			case Orient180:
 				if(oZ < 177){
+					target180(180-oZ);
 					if(newZ < targetAng){
 					ROS_DEBUG_ONCE("Turning Left to Face Forward");
-					target180(180-oZ);
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = backwardRatio;
 					}
@@ -227,9 +230,9 @@ namespace autonomous_control{
 					}
 				}
 				else if(oZ > 183) {
+					target180(180-oZ);
 					if(newZ > targetAng){
 					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
-					target180(180-oZ);
 					motor_command.rightRatio = backwardRatio;
 					motor_command.leftRatio = forwardRatio;
 					}
@@ -285,14 +288,15 @@ namespace autonomous_control{
 		ROS_DEBUG_ONCE("Halt Command Called");
 		motor_command.leftRatio=brake;
 		motor_command.rightRatio=brake;
+		motor_command_.publish(motor_command);
 	}
 
 	void AutonomousControl::LOrR(){
-		if (posX < -0.25) {     //left
+		if (posX < -0.25) {     //right
 			LorR = -1;
 			ROS_DEBUG_ONCE("I'm on the right (negative x)");
 		}
-		else if (posX > 0.25) { //right
+		else if (posX > 0.25) { //left
 			LorR = 1;
 			ROS_DEBUG_ONCE("I'm on the left (positive x)");
 		}
@@ -303,19 +307,22 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::target90R(float desired){
-		updateIMU();
 		if(turn){
 			targetAng = newZ - desired;
+			ROS_DEBUG_STREAM("Target angle " << targetAng);
 		}
+		updateIMU();
+		
 		turn = false;
 	}
 
 	void AutonomousControl::target90L(float desired){
-		updateIMU();
 		if(turn){
 			targetAng = newZ + desired;
 			ROS_DEBUG_STREAM("Target angle " << targetAng);
 		}
+				updateIMU();
+
 		turn = false;
 	}
 
@@ -339,6 +346,12 @@ namespace autonomous_control{
 			newZ = tempZ + 360*numRot;			
 		}
 		ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
+	}
+
+	void AutonomousControl::updateTag(){
+		oZStore = oZ;
+		ROS_DEBUG_STREAM("Storing Orientation of " << oZStore);
+		moveComplete = false;
 	}
 
 	void AutonomousControl::target180(float desired){
