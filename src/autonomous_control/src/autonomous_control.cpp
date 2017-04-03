@@ -93,7 +93,7 @@ namespace autonomous_control{
 					halt();
 					updateTag();
 					updateIMU();
-					ros::Duration(2.0).sleep(); // sleep for two seconds
+					//ros::Duration(2.0).sleep(); // sleep for two seconds
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
