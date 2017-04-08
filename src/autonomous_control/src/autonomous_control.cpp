@@ -35,6 +35,7 @@ namespace autonomous_control{
 		oW = 0.0;
 		pX = 0.0;
 		pY = 0.0;
+		obsFieldStart = 1.5;
 		detected=false;
 		imuX=0.0;
 		imuY=0.0;
@@ -50,6 +51,9 @@ namespace autonomous_control{
 		forwardRatio = 0.2; 
 		backwardRatio = -0.2; 
 		brake = 0.0;
+
+		waiting = false;
+		waitComplete = false;
 
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
@@ -68,7 +72,7 @@ namespace autonomous_control{
 		pY = pose.py;
 		detected = pose.detected;
 		cali.data=true;
-		ROS_INFO_STREAM("Field Position is x = " << posX << ",  y = " << posY);
+		//ROS_INFO_STREAM("Field Position is x = " << posX << ",  y = " << posY);
 	}
 
 	void AutonomousControl::getImu(const sensor_msgs::Imu& imu){
@@ -79,6 +83,7 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::primary(){
+		updateIMU();
 		switch(state){
 			case FindBeacon:
 				if(oW != 1.0){
@@ -90,21 +95,30 @@ namespace autonomous_control{
 					ROS_DEBUG_ONCE("Calibrating lidar");
 				}
 				else{
-					halt();
-					updateTag();
-					updateIMU();
 					//ros::Duration(2.0).sleep(); // sleep for two seconds
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
-					state=Orient90;
+					state=Wait;
 					ROS_DEBUG_ONCE("Found Target");
-					ROS_DEBUG_STREAM("Tag angle " << oZ);
-					ROS_DEBUG_STREAM("IMU angle " << imuZ);
-					tempZ = imuZ;  //Store IMU Angle at halt
+					halt();
+					break;
 				}
 			break;
-			if (moveComplete = false) {
+
+			case Wait:
+				hold(20);
+				if (waiting && waitComplete){
+					updateIMU();
+					updateTag();
+					state = Orient90;
+					tempZ = imuZ;  //Store IMU Angle at halt
+					ROS_DEBUG_STREAM("Tag angle " << oZ);
+					ROS_DEBUG_STREAM("IMU angle " << imuZ);
+				}
+			break;
+
+			if (moveComplete == false) {
 				case Orient90:				
 					switch (LorR) {
 						case 0:
@@ -245,7 +259,7 @@ namespace autonomous_control{
 
 			case DriveToMine:
 				ROS_DEBUG_ONCE("Driving to Mine");
-				if(posY < 3.0){
+				if(posY < obsFieldStart){
 					motor_command.rightRatio=forwardRatio;
 					motor_command.leftRatio=forwardRatio;
 				}
@@ -345,14 +359,14 @@ namespace autonomous_control{
 		else{
 			newZ = tempZ + 360*numRot;			
 		}
-		ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
+		//ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
 	}
 
 	void AutonomousControl::updateTag(){
 		oZStore = oZ;
 		ROS_DEBUG_STREAM("Storing Orientation of " << oZStore);
 		moveComplete = false;
-	}
+	}                    
 
 	void AutonomousControl::target180(float desired){
 		updateIMU();
@@ -363,4 +377,18 @@ namespace autonomous_control{
 		faceForward = true;
 		
 	}
+
+
+	void AutonomousControl::hold(int waitTime){
+		ROS_INFO_STREAM("waitTime " << waitTime);
+		ROS_INFO_STREAM("count " << count);
+		if(count < waitTime){
+			count++;
+		}
+		else{
+			waiting = true;
+			waitComplete = true;
+		}
+	}
 }
+	

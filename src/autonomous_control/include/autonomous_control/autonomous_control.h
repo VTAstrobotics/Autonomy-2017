@@ -21,12 +21,12 @@ namespace autonomous_control{
 		void updateTag();
 	private:
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward, oZStore;
-		float forwardRatio, backwardRatio, brake;
-		bool detected, turn, faceForward, moveComplete;
+		float forwardRatio, backwardRatio, brake, obsFieldStart;
+		bool detected, turn, faceForward, moveComplete, waiting, waitComplete;
 		robot_msgs::Autonomy motor_command;
-		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToMine, Halt} machineState;
+		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToMine, Halt, Wait} machineState;
 		machineState state;
-		int LorR, numRot;
+		int LorR, numRot, count;
 		ros::Subscriber camSub;
 		ros::Subscriber imuSub;
 		ros::Subscriber syncSub;
@@ -41,6 +41,7 @@ namespace autonomous_control{
 		void target90L(float desired);
 		void target180(float desired);
 		void updateIMU();
+		void hold(int waitTime);
 	};
 }
 #endif
