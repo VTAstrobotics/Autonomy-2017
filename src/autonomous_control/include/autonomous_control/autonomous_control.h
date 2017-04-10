@@ -24,7 +24,7 @@ namespace autonomous_control{
 		float forwardRatio, backwardRatio, brake, obsFieldStart;
 		bool detected, turn, faceForward, moveComplete, waiting, waitComplete;
 		robot_msgs::Autonomy motor_command;
-		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToMine, Halt, Wait} machineState;
+		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, Halt, Wait, ScanField} machineState;
 		machineState state;
 		int LorR, numRot, count;
 		ros::Subscriber camSub;
@@ -34,8 +34,10 @@ namespace autonomous_control{
 		ros::Publisher motor_command_;
 		ros::Publisher cali_command_;
 		ros::Publisher scan_command_;
+		ros::Publisher mappingSignal;
 		std_msgs::Empty empty;
 		std_msgs::Bool cali;
+		std_msgs::Bool mapPub;
 		void LOrR();
 		void target90R(float desired);
 		void target90L(float desired);

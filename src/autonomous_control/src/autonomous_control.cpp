@@ -12,7 +12,7 @@ namespace autonomous_control{
 		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);
 		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1);
 		cali_command_ = nh.advertise<std_msgs::Bool>("cali_command",1);
-
+		mappingSignal = nh.advertise<std_msgs::Bool>("startMapping",1);
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this);
 
@@ -54,6 +54,8 @@ namespace autonomous_control{
 
 		waiting = false;
 		waitComplete = false;
+
+		mapPub.data = false;
 
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
@@ -240,7 +242,7 @@ namespace autonomous_control{
 					}
 					else{
 					halt();
-					state=DriveToMine;
+					state=DriveToObsField;
 					}
 				}
 				else if(oZ > 183) {
@@ -252,13 +254,13 @@ namespace autonomous_control{
 					}
 					else{
 					halt();
-					state=DriveToMine;
+					state=DriveToObsField;
 					}
 				}
 			break;
 
-			case DriveToMine:
-				ROS_DEBUG_ONCE("Driving to Mine");
+			case DriveToObsField:
+				ROS_DEBUG_ONCE("Driving to Start of Obstacle Field");
 				if(posY < obsFieldStart){
 					motor_command.rightRatio=forwardRatio;
 					motor_command.leftRatio=forwardRatio;
@@ -266,21 +268,42 @@ namespace autonomous_control{
 				else{
 					scan_command_.publish(empty);
 					halt();
-					state=Halt;
+					state=ScanField;
 				}
 			break;
+
+
+
+			case ScanField:
+				// shit the bed 
+				// git schwifty
+
+				mapPub.data = true;			// Tells the mapping Arduino to start Scanning the Field
+				//mappingSignal.publish(mapPub);
+				hold(60);
+				state = Halt;
+				// mapPub.data = false;
+				// mappingSignal.publish(mapPub);// Tells the mapping Arduino to stop scanning
+			break;
+
+
+
 
 			case Halt:
 				ROS_DEBUG_ONCE("HALT!");
 				halt();
 			break;
 			
+
+
 			default:
 				halt();
 			break;
 		}
-
+		mappingSignal.publish(mapPub);  // Mapping Signal for Arduino
 		motor_command_.publish(motor_command);
+
+		
 		/*if(!detected){
 			motor_command.leftRatio = 150;
 			motor_command.rightRatio = 150;
