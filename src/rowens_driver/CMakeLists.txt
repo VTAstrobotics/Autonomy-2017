@@ -140,7 +140,7 @@ target_link_libraries(rowens_driver
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-#add_dependencies(rowens_driver)
+add_dependencies(rowens_driver robot_msgs_generate_messages_cpp)
 
 ## Declare a C++ executable
 add_executable(rowens_driver_node src/rowens_driver_node.cpp)

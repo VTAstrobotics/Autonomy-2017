@@ -4,7 +4,6 @@
 #include <ros/ros.h>
 #include <apriltags_ros/MetaPose.h>
 #include <robot_msgs/Autonomy.h>
-#include <robot_msgs/Atest.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Bool.h>
