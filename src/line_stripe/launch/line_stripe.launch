@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
+</launch>

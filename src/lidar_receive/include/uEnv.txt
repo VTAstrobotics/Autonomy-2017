@@ -1,0 +1,50 @@
+#Docs: http://elinux.org/Beagleboard:U-boot_partitioning_layout_2.0
+
+uname_r=4.4.43-ti-r84
+#uuid=
+#dtb=
+
+##BeagleBone Black/Green dtb's for v4.1.x (BeagleBone White just works..)
+
+##BeagleBone Black: HDMI (Audio/Video) disabled:
+#dtb=am335x-boneblack-emmc-overlay.dtb
+
+##BeagleBone Black: eMMC disabled:
+#dtb=am335x-boneblack-hdmi-overlay.dtb
+
+##BeagleBone Black: HDMI Audio/eMMC disabled:
+#dtb=am335x-boneblack-nhdmi-overlay.dtb
+
+##BeagleBone Black: HDMI (Audio/Video)/eMMC disabled:
+#dtb=am335x-boneblack-overlay.dtb
+
+##BeagleBone Black: wl1835
+#dtb=am335x-boneblack-wl1835mod.dtb
+
+##BeagleBone Green: eMMC disabled
+#dtb=am335x-bonegreen-overlay.dtb
+
+###EXPERIMENTAL###
+#enable_uboot_overlays=1
+#dtb_overlay=/lib/firmware/BB-UART2-00A0.dtbo
+##U-Boot fdt tweaks...
+#uboot_fdt_buffer=0x60000
+###EXPERIMENTAL###
+
+cmdline=coherent_pool=1M net.ifnames=0 quiet
+
+#In the event of edid real failures, uncomment this next line:
+#cmdline=coherent_pool=1M net.ifnames=0 quiet video=HDMI-A-1:1024x768@60e
+
+##Example v3.8.x
+#cape_disable=capemgr.disable_partno=
+#cape_enable=capemgr.enable_partno=BB-UART1
+
+##Example v4.1.x
+#cape_disable=bone_capemgr.disable_partno=
+cape_enable=bone_capemgr.enable_partno=BB-UART1,BB-UART2
+
+##enable Generic eMMC Flasher:
+##make sure, these tools are installed: dosfstools rsync
+#cmdline=init=/opt/scripts/tools/eMMC/init-eMMC-flasher-v3.sh
+
