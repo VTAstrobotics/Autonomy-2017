@@ -1,5 +1,5 @@
 /*
-	Copyright 2015 Benjamin Vedder	benjamin@vedder.se
+	Copyright 2017 Ryan Owens
 
 	This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,45 +16,45 @@
     */
 
 /*
- * bldc_interface_uart.c
+ * arduino_interface_uart.c
  *
- *  Created on: 9 okt 2015
- *      Author: benjamin
+ *  Created on: 23 Apr 2017
+ *      Author: Ryan
  */
 
-#include "bldc_interface_uart.h"
-#include "bldc_interface.h"
+#include "arduino_interface_uart.h"
+#include "arduino_interface.h"
 
 // Settings
 #define PACKET_HANDLER			0
 
 // Private functions
 static void process_packet(unsigned char *data, unsigned int len);
-static void send_packet_bldc_interface(unsigned char *data, unsigned int len);
+static void send_packet_arduino_interface(unsigned char *data, unsigned int len);
 
 /**
- * Initialize the UART BLDC interface and provide a function to be used for
+ * Initialize the UART arduino interface and provide a function to be used for
  * sending packets.
  *
  * @param func
  * Function provided for sending packets.
  */
-void bldc_interface_uart_init(void(*func)(unsigned char *data, unsigned int len)) {
+void arduino_interface_uart_init(void(*func)(unsigned char *data, unsigned int len)) {
 	// Initialize packet handler
 	packet_init(func, process_packet, PACKET_HANDLER);
 
-	// Initialize the bldc interface and provide a send function
-	bldc_interface_init(send_packet_bldc_interface);
+	// Initialize the arduino interface and provide a send function
+	arduino_interface_init(send_packet_arduino_interface);
 }
 
 /**
  * Process one byte received on the UART. Once a full packet is received the
- * corresponding callback will be called by bldc_interface.
+ * corresponding callback will be called by arduino_interface.
  *
  * @param b
  * The byte received on the UART to process.
  */
-void bldc_interface_uart_process_byte(unsigned char b) {
+void arduino_interface_uart_process_byte(unsigned char b) {
 	packet_process_byte(b, PACKET_HANDLER);
 }
 
@@ -62,7 +62,7 @@ void bldc_interface_uart_process_byte(unsigned char b) {
  * Call this function at around 1 khz to reset the state of the packet
  * interface after a timeout in case data is lost.
  */
-void bldc_interface_uart_run_timer(void) {
+void arduino_interface_uart_run_timer(void) {
 	packet_timerfunc();
 }
 
@@ -76,19 +76,19 @@ void bldc_interface_uart_run_timer(void) {
  * Data array length
  */
 static void process_packet(unsigned char *data, unsigned int len) {
-	// Let bldc_interface process the packet.
-	bldc_interface_process_packet(data, len);
+	// Let arduino_interface process the packet.
+	arduino_interface_process_packet(data, len);
 }
 
 /**
- * Callback that bldc_interface uses to send packets.
+ * Callback that arduino_interface uses to send packets.
  *
  * @param data
  * Data array pointer
  * @param len
  * Data array length
  */
-static void send_packet_bldc_interface(unsigned char *data, unsigned int len) {
+static void send_packet_arduino_interface(unsigned char *data, unsigned int len) {
 	// Pass the packet to the packet handler to add checksum, length, start and stop bytes.
 	packet_send_packet(data, len, PACKET_HANDLER);
 }

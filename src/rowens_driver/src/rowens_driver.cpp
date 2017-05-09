@@ -26,12 +26,9 @@ namespace rowens_driver{
 	}
 
 	void RowensDriver::primary(){
+		// Use DUTY for now
 		leftDrive.set_Duty(leftRatio);
 		rightDrive.set_Duty(rightRatio);
 
-		/*
-		leftDrive.set_Current(leftRatio);
-		rightDrive.set_Current(rightRatio);
-		*/
 	}
 }

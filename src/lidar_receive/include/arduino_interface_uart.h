@@ -16,36 +16,28 @@
     */
 
 /*
- * timers.h
- * Generic abstraction for POSIX timers
- * Only supports one-shot timers
- * 
- * Important: Must compile with -lrt otherwise will have linking errors
+ * arduino_interface_uart.h
  *
- *  Created on: 3 apr 2017
- *      Authors: Anirudh, Ryan
+ *  Created on: 23 Apr 2017
+ *      Author: Ryan
  */
- 
-#ifndef TIMERS_H
-#define TIMERS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-#include <time.h>
-#include <signal.h>
+#ifndef ARDUINO_INTERFACE_UART_H_
+#define ARDUINO_INTERFACE_UART_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 	
-timer_t* new_timer();
-void start_timer(timer_t* timerid, int ms);
-bool check_timer(timer_t* timerid);
-void delete_timer(timer_t* timerid);
+// Includes
+#include "packet.h" // For the MAX_PACKET_LEN define
+
+// Functions
+void arduino_interface_uart_init(void(*func)(unsigned char *data, unsigned int len));
+void arduino_interface_uart_process_byte(unsigned char b);
+void arduino_interface_uart_run_timer(void);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* arduino_INTERFACE_UART_H_ */

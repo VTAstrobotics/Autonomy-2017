@@ -1,0 +1,15 @@
+<launch>
+
+  <node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
+
+  <node
+    pkg="obstacle_testing"
+    type="obstacle_testing_node"
+    name="obstacle_testing"
+    respawn="true"
+    output="screen"
+  />
+
+
+
+</launch>

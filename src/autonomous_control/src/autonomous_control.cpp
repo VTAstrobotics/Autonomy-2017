@@ -15,6 +15,9 @@ namespace autonomous_control{
 		mappingSignal = nh.advertise<std_msgs::Bool>("startMapping",1);
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this);
+		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
+		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this);
+		idle = nh.subscribe("robot/autonomy/enable", 1, &AutonomousControl::Idleing,this);
 
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
@@ -84,9 +87,27 @@ namespace autonomous_control{
 		imuW=imu.orientation.w;		
 	}
 
+	void AutonomousControl::getLidar(const std_msgs::Empty& empty2){
+		
+	}
+
+	void AutonomousControl::getStripe(const std_msgs::Int8MultiArray& stripe){
+
+	}
+
+	void AutonomousControl::Idleing(const std_msgs::Bool& cmd){
+		if(cmd.data){
+			state=FindBeacon;
+		}
+	}
+
 	void AutonomousControl::primary(){
 		updateIMU();
 		switch(state){
+			case Idle:
+				halt();
+				//literaly do nothing at all
+			break;
 			case FindBeacon:
 				if(oW != 1.0){
 					motor_command.leftRatio=forwardRatio;
@@ -413,5 +434,7 @@ namespace autonomous_control{
 			waitComplete = true;
 		}
 	}
+
+
 }
 	

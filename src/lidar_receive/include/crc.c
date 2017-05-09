@@ -1,5 +1,5 @@
 /*
-	Copyright 2012-2014 Benjamin Vedder	benjamin@vedder.se
+	Copyright 2017 Ryan Owens
 
 	This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 /*
  * crc.c
  *
- *  Created on: 26 feb 2012
- *      Author: benjamin
+ *  Created on: 23 Apr 2017
+ *      Author: Ryan
  */
 #include "crc.h"
 

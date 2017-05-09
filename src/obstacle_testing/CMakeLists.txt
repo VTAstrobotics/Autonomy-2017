@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(autonomous_control)
+project(obstacle_testing)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
- apriltags_ros
- roscpp
- std_msgs
- geometry_msgs
- robot_msgs
+  apriltags_ros
+  robot_msgs
+  roscpp
+  std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -69,9 +68,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   apriltags_ros
    robot_msgs
+   std_msgs
  )
 
 ################################################
@@ -104,9 +102,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES autonomous_control
-  CATKIN_DEPENDS apriltags_ros roscpp robot_msgs
+#  INCLUDE_DIRS include
+#  LIBRARIES obstacle_testing
+#  CATKIN_DEPENDS apriltags_ros robot_msgs roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -114,72 +112,67 @@ catkin_package(
 ## Build ##
 ###########
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
 ## Declare a C++ library
-add_library(autonomous_control
-   src/autonomous_control.cpp
-   #src/obstacle_testing.cpp
- )
- 
- target_link_libraries(autonomous_control
- ${catkin_LIBRARIES}
+add_library(obstacle_testing
+  src/obstacle_testing.cpp
 )
+
+target_link_libraries(obstacle_testing
+${catkin_LIBRARIES}
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-  add_dependencies(autonomous_control autonomous_control_ros_generate_messages_cpp)
+add_dependencies(obstacle_testing obstacle_testing_ros_generate_messages_cpp)
 
 ## Declare a C++ executable
-add_executable(autonomous_control_node src/autonomous_control_node.cpp)
-##add_executable(obstacle_testing_node src/obstacle_testing_node.cpp)
+add_executable(obstacle_testing_node src/obstacle_testing_node.cpp)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(autonomous_control_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(obstacle_testing_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(autonomous_control_node
-   autonomous_control
+target_link_libraries(obstacle_testing_node
+	obstacle_testing
    ${catkin_LIBRARIES}
 )
-
-
 
 #############
 ## Install ##
 #############
-
-
-
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS#   scripts/my_python_script
+# install(PROGRAMS
+#   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
 ## Mark executables and/or libraries for installation
- install(TARGETS autonomous_control autonomous_control_node
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+install(TARGETS obstacle_testing obstacle_testing_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
- install(DIRECTORY include/autonomous_control
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
-   PATTERN ".svn" EXCLUDE
- )
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -193,7 +186,7 @@ add_executable(autonomous_control_node src/autonomous_control_node.cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_autonomous_control.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_obstacle_testing.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

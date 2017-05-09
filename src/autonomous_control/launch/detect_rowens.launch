@@ -149,7 +149,7 @@
     -->
   </group>
 
-  <!--
+  
 
   <arg name="frame_id" default="/imu"/>
 
@@ -175,7 +175,7 @@
     name="quat2euler"
     respawn = "true"
   />
-  -->
+  
 
   <node
     pkg="cam_data_filter"
@@ -191,6 +191,11 @@
     respawn="true"
     output="screen"
   />
+
+  <node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
+
+  <node pkg="lidar_receive" name="lidar_receive_node" type="lidar_receive_node" output="screen"/>
+
 <!--
   <node
     pkg="rowens_driver"
@@ -199,11 +204,11 @@
     required="true"
     output="screen"
   />
-  -->  
+
 
   <node pkg="rosserial_python" type="serial_node.py" name="rosserial" output="screen">
     <param name="port" value="/dev/ttyByrneUno" /> 
     <param name="baud" value="57600" />
   </node>
-
+-->
 </launch>

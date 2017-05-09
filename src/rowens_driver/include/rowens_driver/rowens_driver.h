@@ -8,8 +8,8 @@
 
 namespace rowens_driver{
 
-	BLDC leftDrive(LEFTDRIVE, CIM);
-	BLDC rightDrive(RIGHTDRIVE, CIM);
+	BLDC leftDrive(LEFTDRIVE, Alien_4260);
+	BLDC rightDrive(RIGHTDRIVE, Alien_4260);
 
 	class RowensDriver{
 	public:

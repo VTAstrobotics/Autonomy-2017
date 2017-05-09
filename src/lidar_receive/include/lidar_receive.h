@@ -2,14 +2,9 @@
 #define LIDAR_RECEIVE_H
 
 #include <ros/ros.h>
-#include <robot_msgs/PointArray.h>
+//#include <robot_msgs/PointArray.h>
 #include <geometry_msgs/Point.h>
-#include <stdio.h>
-#include <string.h>
-#include "bldc_interface.h"
-#include "comm_uart.h"
-#include "bldc_interface_uart.h"
-#include <unistd.h> // for usleep
+#include <std_msgs/Empty.h>
 
 namespace lidar_receive{
 	class LidarReceive{
@@ -18,6 +13,7 @@ namespace lidar_receive{
 		void getPoint(const geometry_msgs::Point& subby);
 		void constructMap();
 		void receiveCB();
+		void startMapCB();
 		
 	private:
 		float oldVal[3];
@@ -25,6 +21,7 @@ namespace lidar_receive{
 		int mapCounter;
 		float mapArray[3][49];
 		ros::Subscriber lidarSub;
+		ros::Publisher lidarSweep;
 	};
 }
 #endif

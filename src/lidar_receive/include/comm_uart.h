@@ -1,12 +1,9 @@
 /*
  * comm_uart.h
  *
- *  Created on: 17 aug 2015
- *      Author: benjamin
- *  Modified on: 7 MAR 2017
- *      By: Ryan Owens
- *          - Added function to close fd
- *          - Added function to receive data
+ *  Created on: 23 Apr 2017
+ *      Author: Ryan
+ *
  */
 
 #ifndef COMM_UART_H_

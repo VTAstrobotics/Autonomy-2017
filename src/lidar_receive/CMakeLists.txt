@@ -66,12 +66,12 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#    DEPENDENCIES
-#    geometry_msgs
-#    std_msgs
-#    robot_msgs  # Or other packages containing msgs
-#)
+generate_messages(
+    DEPENDENCIES
+    geometry_msgs
+    std_msgs
+    robot_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -121,9 +121,9 @@ include_directories(${catkin_INCLUDE_DIRS})
 ## Declare a C++ library
 add_library(lidar_receive
   src/lidar_receive.cpp
-  include/bldc_interface.c
-  include/bldc_interface_uart.c
-  include/bldc_interface_uart.c
+  include/arduino_interface.c
+  include/arduino_interface_uart.c
+  include/arduino_interface_uart.c
   include/buffer.c
   include/comm_uart.c
   include/crc.c

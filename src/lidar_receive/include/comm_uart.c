@@ -1,5 +1,5 @@
 /*
-	Copyright 2015 Benjamin Vedder	benjamin@vedder.se
+	Copyright 2017 Ryan Owens
 
 	This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,27 +18,18 @@
 /*
  * comm_uart.c
  *
- *  Created on: 17 aug 2015
- *      Author: benjamin
- *  Modified on: 20 MAR 2017
- *      By: Ryan Owens
- *          - Modified for use with any linux serial device
- *          - Send and receive packets over serial port
- *          - Removed all code for STM32F4 Discovery
- *          - Uses a single rx function instead of processing threads.
- *            This allows more control of received data from
- *            multiple VESCs over CAN by calling rx only when
- *            application is ready to process data for each VESC.
+ *  Created on: 23 Apr 2017
+ *      Author: Ryan
+ *
  */
 
 #include "comm_uart.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <poll.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <termios.h>
-#include "bldc_interface_uart.h"
+#include "arduino_interface_uart.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -73,7 +64,7 @@ int receive_packet() {
 	// Loop through the buffer and send each byte to the
 	// packet handler
 	for (i = 0; i < ret; i++) {
-		bldc_interface_uart_process_byte(buffer[i]);
+		arduino_interface_uart_process_byte(buffer[i]);
 	}
 	// clear any data on Serial Rx that was not read
 	//tcflush(fd, TCIFLUSH);
@@ -144,8 +135,8 @@ void comm_uart_init(char* modemDevice) {
     tcflush(fd, TCIFLUSH);
     tcsetattr(fd,TCSANOW,&newtio);
     
-	// Initialize the bldc interface and provide a send function
-	bldc_interface_uart_init(send_packet);
+	// Initialize the arduino interface and provide a send function
+	arduino_interface_uart_init(send_packet);
 }
 
 /*
