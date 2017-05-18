@@ -1,0 +1,6 @@
+#! /bin/sh
+
+export ROS_HOSTNAME="10.0.1.35"
+export ROS_MASTER_URI="http://10.0.1.30:11311"
+source /home/astrobotics/ros_code/devel/setup.sh
+roslaunch line_stripe line_stripe.launch

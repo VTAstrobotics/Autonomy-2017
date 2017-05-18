@@ -11,8 +11,8 @@ namespace rowens_driver{
 
 		leftRatio = 0.0;
 		rightRatio = 0.0;
-		digCmd = 0.0;
-		dumpCmd = 0.0;
+		//digCmd = 0.0;
+		//dumpCmd = 0.0;
 
 		
 		BLDC::init((char*)"/dev/ttyUART1");	
@@ -21,8 +21,8 @@ namespace rowens_driver{
 	void RowensDriver::cmd_recieved(const robot_msgs::Autonomy& cmd){
 		leftRatio = cmd.leftRatio;
 		rightRatio = cmd.rightRatio;
-		digCmd = cmd.digCmd;
-		dumpCmd = cmd.dumpCmd;
+		//digCmd = cmd.digCmd;
+		//dumpCmd = cmd.dumpCmd;
 	}
 
 	void RowensDriver::primary(){

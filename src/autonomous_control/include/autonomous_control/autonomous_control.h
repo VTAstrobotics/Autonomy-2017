@@ -4,10 +4,12 @@
 #include <ros/ros.h>
 #include <apriltags_ros/MetaPose.h>
 #include <robot_msgs/Autonomy.h>
+#include <robot_msgs/MotorFeedback.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8MultiArray.h>
+#include <std_msgs/Int8.h>
 
 namespace autonomous_control{
 	
@@ -19,23 +21,30 @@ namespace autonomous_control{
 		void getLidar(const std_msgs::Empty& empty2);
 		void getStripe(const std_msgs::Int8MultiArray& stripe);
 		void Idleing(const std_msgs::Bool& cmd);
+		void Feedback(const robot_msgs::MotorFeedback& mf);
+		void IR0(const std_msgs::Int8& val);
+		void IR1(const std_msgs::Int8& val);
 		void primary();
 		void halt();
 		void updateTag();
 	private:
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward, oZStore;
-		float forwardRatio, backwardRatio, brake, obsFieldStart;
-		bool detected, turn, faceForward, moveComplete, waiting, waitComplete;
+		float forwardRatio, backwardRatio, brake, obsFieldStart, drumForward, drumReverse;
+		float drumRPM, leftRPM, rightRPM;
+		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup;
 		robot_msgs::Autonomy motor_command;
-		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, Halt, Wait, ScanField, Idle} machineState;
+		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, Dump, Halt, Wait, Idle} machineState;
 		machineState state;
-		int LorR, numRot, count;
+		int LorR, numRot, count, cycleCount, ir0, ir1;
 		ros::Subscriber camSub;
 		ros::Subscriber imuSub;
 		ros::Subscriber syncSub;
 		ros::Subscriber lidarSweep;
 		ros::Subscriber stripeArray;
 		ros::Subscriber idle;
+		ros::Subscriber feedback;
+		ros::Subscriber ir0sub;
+		ros::Subscriber ir1sub;
 		ros::Publisher pub;
 		ros::Publisher motor_command_;
 		ros::Publisher cali_command_;

@@ -18,6 +18,9 @@ namespace autonomous_control{
 		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
 		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this);
 		idle = nh.subscribe("robot/autonomy/enable", 1, &AutonomousControl::Idleing,this);
+		feedback = nh.subscribe("robot/autonomy/feedback", 1, &AutonomousControl::Feedback, this);
+		ir0sub = nh.subscribe("IR0", 1, &AutonomousControl::IR0, this);
+		ir1sub = nh.subscribe("IR1", 1, &AutonomousControl::IR1, this);
 
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
@@ -45,7 +48,7 @@ namespace autonomous_control{
 		imuZ=0.0;
 		imuW=0.0;
 		prevZ=0.0;
-		state = FindBeacon;
+		state = Idle;
 		LorR = 0;
 		numRot = 0;
 		imuForward = 0;
@@ -55,10 +58,17 @@ namespace autonomous_control{
 		backwardRatio = -0.2; 
 		brake = 0.0;
 
-		waiting = false;
+		count = 0;
 		waitComplete = false;
+		cycleCount = 0;
 
 		mapPub.data = false;
+
+		go = false;
+		startup = true;
+
+		drumForward = 1.0;
+		drumReverse = -1.0;
 
 		ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
@@ -96,13 +106,32 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::Idleing(const std_msgs::Bool& cmd){
-		if(cmd.data){
+		go = cmd.data;
+		if(cmd.data && startup){
 			state=FindBeacon;
+			startup = false;
 		}
+	}
+
+	void AutonomousControl::Feedback(const robot_msgs::MotorFeedback& mf){
+		leftRPM = mf.leftTreadRPM;
+		rightRPM = mf.rightTreadRPM;
+		drumRPM = mf.drumRPM;
+	}
+
+	void AutonomousControl::IR0(const std_msgs::Int8& val){
+		ir0=val.data;
+	}
+
+	void AutonomousControl::IR1(const std_msgs::Int8& val){
+		ir1=val.data;
 	}
 
 	void AutonomousControl::primary(){
 		updateIMU();
+		if(!go){
+			state = Idle;
+		}
 		switch(state){
 			case Idle:
 				halt();
@@ -122,6 +151,7 @@ namespace autonomous_control{
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
+					waitComplete = false;
 					state=Wait;
 					ROS_DEBUG_ONCE("Found Target");
 					halt();
@@ -131,7 +161,7 @@ namespace autonomous_control{
 
 			case Wait:
 				hold(20);
-				if (waiting && waitComplete){
+				if (waitComplete){
 					updateIMU();
 					updateTag();
 					state = Orient90;
@@ -275,7 +305,8 @@ namespace autonomous_control{
 					}
 					else{
 					halt();
-					state=DriveToObsField;
+					//state=DriveToObsField;
+					state = DriveToMine;
 					}
 				}
 			break;
@@ -287,28 +318,85 @@ namespace autonomous_control{
 					motor_command.leftRatio=forwardRatio;
 				}
 				else{
-					scan_command_.publish(empty);
 					halt();
-					state=ScanField;
+					state=DriveToMine;
 				}
 			break;
 
-
-
-			case ScanField:
-				// shit the bed 
-				// git schwifty
-
-				mapPub.data = true;			// Tells the mapping Arduino to start Scanning the Field
-				//mappingSignal.publish(mapPub);
-				hold(60);
-				state = Halt;
-				// mapPub.data = false;
-				// mappingSignal.publish(mapPub);// Tells the mapping Arduino to stop scanning
+			case DriveToMine:
+				if(posY < 5){
+					motor_command.rightRatio = forwardRatio;
+					motor_command.leftRatio = forwardRatio;
+				}
+				else{
+					halt();
+					waitComplete = false;
+					count = 0;
+					state = Mining; 
+					//lift down
+				}
 			break;
 
+			case Mining:
+				//forward drum
+				motor_command.drumRatio = drumForward;
+				hold(30);
+				if(waitComplete){
+					halt();
+					//lift up
+					state = Deposit;
+					waitComplete = false;
+					count = 0;
+				}
+			break;
 
+			case Deposit:
+				//reverse drum
+				motor_command.drumRatio=drumReverse;
+				hold(30);
+				if(waitComplete){
+					halt();
+					state = ReturnToObs;
+					waitComplete = false;
+					count = 0;
+				}
+			break;
 
+			case ReturnToObs:
+				if(posY > 4.44){
+					motor_command.rightRatio = backwardRatio;
+					motor_command.leftRatio = backwardRatio;
+				}
+				else{
+					halt();
+					state = ReturnToBin;
+				}
+			break;
+
+			case ReturnToBin:
+				if(posY > 1){
+					motor_command.rightRatio = backwardRatio;
+					motor_command.leftRatio = backwardRatio;
+				}
+				/*else if(IR?){
+
+				}*/
+				else{
+					halt();
+					state = Dump;
+				}
+			break;
+
+			case Dump:
+				//dump
+				cycleCount++;
+				if(cycleCount < 2){
+					state = DriveToMine;
+				}
+				else{
+					state = Halt;
+				}
+			break;
 
 			case Halt:
 				ROS_DEBUG_ONCE("HALT!");
@@ -430,7 +518,6 @@ namespace autonomous_control{
 			count++;
 		}
 		else{
-			waiting = true;
 			waitComplete = true;
 		}
 	}
