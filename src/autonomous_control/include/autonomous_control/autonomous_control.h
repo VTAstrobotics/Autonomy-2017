@@ -33,7 +33,8 @@ namespace autonomous_control{
 		float drumRPM, leftRPM, rightRPM;
 		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup;
 		robot_msgs::Autonomy motor_command;
-		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, Dump, Halt, Wait, Idle} machineState;
+		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, 
+			DeadMan, DumpPrep, Dump, DumpFinish, TravelPrep, Halt, Wait, Idle} machineState;
 		machineState state;
 		int LorR, numRot, count, cycleCount, ir0, ir1;
 		ros::Subscriber camSub;

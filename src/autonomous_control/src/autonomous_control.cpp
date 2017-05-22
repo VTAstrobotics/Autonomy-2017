@@ -334,6 +334,8 @@ namespace autonomous_control{
 					count = 0;
 					state = Mining; 
 					//lift down
+					motor_command.liftDown = true;
+					motor_command.liftUp = false;
 				}
 			break;
 
@@ -344,6 +346,8 @@ namespace autonomous_control{
 				if(waitComplete){
 					halt();
 					//lift up
+					motor_command.liftUp = true;
+					motor_command.liftDown = false;
 					state = Deposit;
 					waitComplete = false;
 					count = 0;
@@ -378,23 +382,78 @@ namespace autonomous_control{
 					motor_command.rightRatio = backwardRatio;
 					motor_command.leftRatio = backwardRatio;
 				}
-				/*else if(IR?){
-
-				}*/
+				else if(ir0 > 30 && ir1 >30){
+					motor_command.rightRatio = backwardRatio;
+					motor_command.leftRatio = backwardRatio;
+				}
 				else{
 					halt();
+					state = DeadMan;
+				}
+			break;
+
+			case DeadMan:
+				motor_command.rightRatio = 0.05;
+				motor_command.leftRatio = 0.05;
+				hold(30);
+				if(waitComplete){
+					state = DumpPrep;
+					waitComplete = false;
+					count = 0;
+				}
+			break;
+
+			case DumpPrep:
+				//dump
+				motor_command.liftDown=true;
+				motor_command.liftUp=false;
+				hold(30);
+				if(waitComplete){
 					state = Dump;
+					motor_command.liftDown=false;
+					motor_command.liftUp=false;
+					waitComplete = false;
+					count = 0;
 				}
 			break;
 
 			case Dump:
-				//dump
-				cycleCount++;
-				if(cycleCount < 2){
-					state = DriveToMine;
+				motor_command.storageUp = true;
+				motor_command.storageDown = false;
+				hold(30);
+				if(waitComplete){
+					cycleCount++;
+					state = DumpFinish;
+					waitComplete=false;
+					count=0;
 				}
-				else{
-					state = Halt;
+			break;
+
+			case DumpFinish:
+				motor_command.storageUp=false;
+				motor_command.storageDown=true;
+				hold(30);
+				if(waitComplete){
+					waitComplete=false;
+					count=0;
+					halt();
+				}
+			break;
+
+			case TravelPrep:
+				motor_command.liftUp=true;
+				motor_command.liftDown=false;
+				hold(30);
+				if(waitComplete){
+					halt();
+					waitComplete=false;
+					count=0;
+					if(cycleCount < 2){
+						state = DriveToMine;
+					}
+					else{
+						state = Halt;
+					}
 				}
 			break;
 
@@ -434,6 +493,11 @@ namespace autonomous_control{
 		ROS_DEBUG_ONCE("Halt Command Called");
 		motor_command.leftRatio=brake;
 		motor_command.rightRatio=brake;
+		motor_command.drumRatio=brake;
+		motor_command.liftUp=false;
+		motor_command.liftDown=false;
+		motor_command.storageUp=false;
+		motor_command.storageDown=false;
 		motor_command_.publish(motor_command);
 	}
 

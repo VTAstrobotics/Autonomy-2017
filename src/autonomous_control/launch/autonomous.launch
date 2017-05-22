@@ -194,4 +194,7 @@
     <param name="baud" value="57600" />
   </node>
   
+  <!--
+  <node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
+  -->
 </launch>
