@@ -31,11 +31,12 @@ namespace autonomous_control{
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward, oZStore;
 		float forwardRatio, backwardRatio, brake, obsFieldStart, drumForward, drumReverse;
 		float drumRPM, leftRPM, rightRPM;
-		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup;
+		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup, angleTargeted;
 		robot_msgs::Autonomy motor_command;
 		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, 
-			DeadMan, DumpPrep, Dump, DumpFinish, TravelPrep, Halt, Wait, Idle} machineState;
+			DeadMan, DumpPrep, Dump, DumpFinish, TravelPrep, Halt, Wait, Idle, Orient180imu} machineState;
 		machineState state;
+		machineState prevState;
 		int LorR, numRot, count, cycleCount, ir0, ir1;
 		ros::Subscriber camSub;
 		ros::Subscriber imuSub;
@@ -59,6 +60,7 @@ namespace autonomous_control{
 		void target90L(float desired);
 		void target180(float desired);
 		void updateIMU();
+
 		void hold(int waitTime);
 	};
 }

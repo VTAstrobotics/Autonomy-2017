@@ -49,11 +49,12 @@ namespace autonomous_control{
 		imuW=0.0;
 		prevZ=0.0;
 		state = Idle;
+		prevState = state;
 		LorR = 0;
 		numRot = 0;
 		imuForward = 0;
+		angleTargeted= false;  
 		faceForward = false;  // bool used to check whether bot is facing forward
-
 		forwardRatio = 0.2; 
 		backwardRatio = -0.2; 
 		brake = 0.0;
@@ -152,6 +153,7 @@ namespace autonomous_control{
 					LOrR();
 					turn = true;
 					waitComplete = false;
+					prevState = state;
 					state=Wait;
 					ROS_DEBUG_ONCE("Found Target");
 					halt();
@@ -164,6 +166,7 @@ namespace autonomous_control{
 				if (waitComplete){
 					updateIMU();
 					updateTag();
+					prevState = state;
 					state = Orient90;
 					tempZ = imuZ;  //Store IMU Angle at halt
 					ROS_DEBUG_STREAM("Tag angle " << oZ);
@@ -175,6 +178,7 @@ namespace autonomous_control{
 				case Orient90:				
 					switch (LorR) {
 						case 0:
+						prevState = state;
 							state=Orient180;
 						break;
 					
@@ -189,6 +193,7 @@ namespace autonomous_control{
 								}
 								else{
 									halt();
+									prevState = state;
 									state = DriveToCenter;
 									moveComplete = true;
 								}
@@ -204,6 +209,7 @@ namespace autonomous_control{
 								else{
 									halt();
 									state = DriveToCenter;
+									prevState = state;
 									moveComplete = true;
 								}
 							}
@@ -217,6 +223,7 @@ namespace autonomous_control{
 								}
 								else{
 									halt();
+									prevState = state;
 									state = DriveToCenter;
 									moveComplete = true;
 								}
@@ -234,6 +241,7 @@ namespace autonomous_control{
 								}
 								else{
 									halt();
+									prevState = state;
 									state = DriveToCenter;
 									moveComplete = true;
 								}
@@ -248,6 +256,7 @@ namespace autonomous_control{
 								}
 								else{
 									halt();
+									prevState = state;
 									state = DriveToCenter;
 									moveComplete = true;
 								}
@@ -262,6 +271,7 @@ namespace autonomous_control{
 								}
 								else{
 									halt();
+									prevState = state;
 									state = DriveToCenter;
 									moveComplete = true;
 								}
@@ -279,11 +289,12 @@ namespace autonomous_control{
 				}
 				else{
 					halt();
+					prevState = state;
 					state=Orient180;
 				}
 			break;
 
-			case Orient180:
+			case Orient180:  //This case is called to target the forward angle when apriltags are in sight
 				if(oZ < 177){
 					target180(180-oZ);
 					if(newZ < targetAng){
@@ -294,6 +305,11 @@ namespace autonomous_control{
 					else{
 					halt();
 					state=DriveToObsField;
+					updateIMU();
+					imuForward = newZ;
+					faceForward = true;
+					state = prevState;
+					prevState = Orient180;
 					}
 				}
 				else if(oZ > 183) {
@@ -307,6 +323,42 @@ namespace autonomous_control{
 					halt();
 					//state=DriveToObsField;
 					state = DriveToMine;
+					updateIMU();
+					imuForward = newZ;
+					faceForward = true;
+					state = prevState;
+					prevState = Orient180;					
+					}
+				}
+			break;
+
+			case Orient180imu:  //This case is called to target the forward angle when apriltags are NOT in sight.  
+								//Note that this can only be called once the imu is calibrated (using previous vision of the tag)
+				if(oZ < 177){
+					target180(imuForward - newZ);
+					if(newZ < imuForward){
+					ROS_DEBUG_ONCE("Turning Left to Face Forward");
+					motor_command.rightRatio = forwardRatio;
+					motor_command.leftRatio = backwardRatio;
+					}
+					else{
+					halt();
+					state=prevState;
+					prevState = Orient180imu;
+					}
+				}
+				else if(oZ > 183) {
+					target180(imuForward - newZ);
+					if(newZ > imuForward){
+					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
+					motor_command.rightRatio = backwardRatio;
+					motor_command.leftRatio = forwardRatio;
+					}
+					else{
+					halt();
+					//state=DriveToObsField;
+					state = prevState;
+					prevState = Orient180imu;
 					}
 				}
 			break;
@@ -324,20 +376,41 @@ namespace autonomous_control{
 			break;
 
 			case DriveToMine:
-				if(posY < 5){
+				// if oW exists, use orient 180 case, otherwise use orient180imu case.
+				prevState = state;
+				if(posY < 5){					
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = forwardRatio;
+					hold(10);
+					if (waitComplete){
+
+						waitComplete = false;
+						count = 0;
+						halt();
+						if (oW){
+							state = Orient180;
+							break;
+						}
+						else{
+							state = Orient180imu;
+							break;
+						}
+					}
+					
 				}
 				else{
 					halt();
 					waitComplete = false;
 					count = 0;
+					prevState = state;
 					state = Mining; 
 					//lift down
 					motor_command.liftDown = true;
 					motor_command.liftUp = false;
 				}
 			break;
+
+
 
 			case Mining:
 				//forward drum
@@ -470,7 +543,7 @@ namespace autonomous_control{
 		}
 		mappingSignal.publish(mapPub);  // Mapping Signal for Arduino
 		motor_command_.publish(motor_command);
-
+		oW = 0.0;  // Reset the apriltag boolean so we can track whether tags are in vision or not
 		
 		/*if(!detected){
 			motor_command.leftRatio = 150;
@@ -536,6 +609,8 @@ namespace autonomous_control{
 		turn = false;
 	}
 
+
+
 	void AutonomousControl::updateIMU(){
 		prevZ = tempZ -360*numRot;
 		tempZ = imuZ;
@@ -566,11 +641,11 @@ namespace autonomous_control{
 
 	void AutonomousControl::target180(float desired){
 		updateIMU();
-		if(!faceForward){
+		if(!angleTargeted){
 			targetAng = newZ + desired;
 			ROS_DEBUG_STREAM("Turning Forward by " << targetAng);
 		}
-		faceForward = true;
+		angleTargeted = true;
 		
 	}
 
