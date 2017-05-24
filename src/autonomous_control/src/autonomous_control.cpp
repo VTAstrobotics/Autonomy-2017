@@ -71,7 +71,10 @@ namespace autonomous_control{
 		drumForward = 1.0;
 		drumReverse = -1.0;
 
-		ros::Duration(3.0).sleep();
+		liftLowerLimit = 150;
+		liftUpperLimit = 50;
+
+		//ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");	
 
 	}
@@ -108,7 +111,9 @@ namespace autonomous_control{
 
 	void AutonomousControl::Idleing(const std_msgs::Bool& cmd){
 		go = cmd.data;
+		ROS_INFO_STREAM("go command is "<<go);
 		if(cmd.data && startup){
+			ROS_INFO_STREAM("go command is "<<go);
 			state=FindBeacon;
 			startup = false;
 		}
@@ -118,6 +123,7 @@ namespace autonomous_control{
 		leftRPM = mf.leftTreadRPM;
 		rightRPM = mf.rightTreadRPM;
 		drumRPM = mf.drumRPM;
+		liftPos = mf.liftPos;
 	}
 
 	void AutonomousControl::IR0(const std_msgs::Int8& val){
@@ -404,9 +410,7 @@ namespace autonomous_control{
 					count = 0;
 					prevState = state;
 					state = Mining; 
-					//lift down
-					motor_command.liftDown = true;
-					motor_command.liftUp = false;
+					
 				}
 			break;
 
@@ -415,27 +419,37 @@ namespace autonomous_control{
 			case Mining:
 				//forward drum
 				motor_command.drumRatio = drumForward;
-				hold(30);
+				//lift down
+				if (liftPos>liftLowerLimit){
+					motor_command.liftDown = true;
+					motor_command.liftUp = false;
+				}
+				hold(100);
 				if(waitComplete){
-					halt();
-					//lift up
-					motor_command.liftUp = true;
+					motor_command.drumRatio=brake;
 					motor_command.liftDown = false;
+					motor_command.liftUp = true;
 					state = Deposit;
-					waitComplete = false;
-					count = 0;
 				}
 			break;
 
 			case Deposit:
-				//reverse drum
-				motor_command.drumRatio=drumReverse;
-				hold(30);
-				if(waitComplete){
-					halt();
-					state = ReturnToObs;
-					waitComplete = false;
-					count = 0;
+				if(liftPos<liftUpperLimit){
+					motor_command.liftUp = true;
+					motor_command.liftDown = false;
+				}
+				else{
+					motor_command.liftUp = false;
+					motor_command.liftDown = false;
+					//reverse drum
+					motor_command.drumRatio=drumReverse;
+					hold(30);
+					if(waitComplete){
+						halt();
+						state = ReturnToObs;
+						waitComplete = false;
+						count = 0;
+					}
 				}
 			break;
 

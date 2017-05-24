@@ -1,0 +1,20 @@
+# Service file for systemd, will launch 2017 autonomy on boot after network is connected
+# Adjust user and path to cloned repo as necessary
+# To install:
+# - copy this file to `/lib/systemd/system` or `/usr/lib/systemd/system`
+# - reload systemd with `systemctl daemon-reload` (or reboot)
+# - enable with `systemctl enable astro-vision-slave`
+# Check status: `systemctl status astro-vision-slave`
+# Restart code: `systemctl restart astro-vision-slave`
+
+[Unit]
+Description=Astrobotics 2017 (A.R.E.S) autonomy code
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/bin/sh /home/astrobotics/ros_code/astro-vision-slave.sh
+User=astrobotics
+
+[Install]
+WantedBy=multi-user.target

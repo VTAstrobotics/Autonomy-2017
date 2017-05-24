@@ -30,7 +30,7 @@ namespace autonomous_control{
 	private:
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward, oZStore;
 		float forwardRatio, backwardRatio, brake, obsFieldStart, drumForward, drumReverse;
-		float drumRPM, leftRPM, rightRPM;
+		float drumRPM, leftRPM, rightRPM, liftPos, liftLowerLimit, liftUpperLimit;
 		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup, angleTargeted;
 		robot_msgs::Autonomy motor_command;
 		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, 

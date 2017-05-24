@@ -35,18 +35,16 @@
       <!-- Describe the tags -->
       <rosparam param="tag_descriptions">[
         {id: 0, size: 0.162, frame_id: i_did_it},
-        {id: 1, size: 0.163513, frame_id: a_frame},
-        {id: 2, size: 0.163513, frame_id: tag_2},
-        {id: 3, size: 0.163513},
-        {id: 4, size: 0.163513},
-        {id: 5, size: 0.163513}]
+        {id: 1, size: 0.115, frame_id: a_frame},
+        {id: 2, size: 0.115, frame_id: tag_2},
+        {id: 3, size: 0.115},
+        {id: 4, size: 0.115}]
       </rosparam>
     </node>
 
   	<node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
       <remap from="image" to="tag_detections_image"/>
     </node>
-
   </group>
 
   <group ns="left">
@@ -85,10 +83,10 @@
       <!-- Describe the tags -->
       <rosparam param="tag_descriptions">[
         {id: 0, size: 0.162, frame_id: i_did_it},
-        {id: 1, size: 0.163513, frame_id: a_frame},
-        {id: 2, size: 0.163513, frame_id: tag_2},
-        {id: 3, size: 0.163513},
-        {id: 4, size: 0.163513},
+        {id: 1, size: 0.115, frame_id: a_frame},
+        {id: 2, size: 0.115, frame_id: tag_2},
+        {id: 3, size: 0.115},
+        {id: 4, size: 0.115},
         {id: 5, size: 0.163513}]
       </rosparam>
     </node>
@@ -135,10 +133,10 @@
       <!-- Describe the tags -->
       <rosparam param="tag_descriptions">[
         {id: 0, size: 0.162, frame_id: i_did_it},
-        {id: 1, size: 0.163513, frame_id: a_frame},
-        {id: 2, size: 0.163513, frame_id: tag_2},
-        {id: 3, size: 0.163513},
-        {id: 4, size: 0.163513},
+        {id: 1, size: 0.115, frame_id: a_frame},
+        {id: 2, size: 0.115, frame_id: tag_2},
+        {id: 3, size: 0.115},
+        {id: 4, size: 0.115},
         {id: 5, size: 0.163513}]
       </rosparam>
     </node>
@@ -149,52 +147,10 @@
 -->
   </group>
 
-  <arg name="frame_id" default="/imu"/>
-
-    <arg name="frame_local" default="ENU"/>
-
-  <node pkg="xsens_driver" type="mtnode.py" name="xsens_driver" output="screen" respawn="true">
-    <param name="frame_id" value="$(arg frame_id)"/>
-    <param name="frame_local" value="$(arg frame_local)"/>
-    <param name="device" value="auto"/>
-    <param name="baudrate" value="115200"/>
-    <param name="timeout" value="0.002"/>
-  </node>
-
-  <node 
-    pkg="quat2euler"
-    type="quat2euler_node"
-    name="quat2euler"
-    respawn = "true"
-  />
-
-  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="madgwick_filter" output="screen">
-    <remap from="imu/data" to="imu/data_madgwick"/>
-    <remap from="imu/data_raw" to="imu/data"/>
-    <param name="use_mag" type="bool" value="false"/>
-  </node>
-
   <node
     pkg="cam_data_filter"
     type="cam_data_filter_node"
     name="cam_data_filter"
     respawn="true"
   />
-
-  <node
-    pkg="autonomous_control"
-    type="autonomous_control_node"
-    name="autonomous_control"
-    respawn="true"
-    output="screen"
-  />
-
-  <node pkg="rosserial_python" type="serial_node.py" name="rosserial" output="screen">
-    <param name="port" value="/dev/ttyByrneUno" />
-    <param name="baud" value="57600" />
-  </node>
-  
-  <!--
-  <node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
-  -->
 </launch>
