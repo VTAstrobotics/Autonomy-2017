@@ -31,10 +31,10 @@ namespace autonomous_control{
 		float posX, posY, posZ, oX, oY, oZ, oW, pX, pY, imuX, imuY, imuZ, imuW, targetAng, prevZ, newZ, tempZ, imuForward, oZStore;
 		float forwardRatio, backwardRatio, brake, obsFieldStart, drumForward, drumReverse;
 		float drumRPM, leftRPM, rightRPM, liftPos, liftLowerLimit, liftUpperLimit;
-		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup, angleTargeted;
+		bool detected, turn, faceForward, moveComplete, waitComplete, go, startup, angleTargeted,inObsField;
 		robot_msgs::Autonomy motor_command;
-		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, Deposit, ReturnToObs, ReturnToBin, 
-			DeadMan, DumpPrep, Dump, DumpFinish, TravelPrep, Halt, Wait, Idle, Orient180imu} machineState;
+		typedef enum{FindBeacon, Orient90, DriveToCenter, Orient180, DriveToObsField, DriveToMine, Mining, DepositPrep, Deposit, ReturnToObs, ReturnToBin, 
+			DeadMan, DumpPrep, Dump, DumpFinish, TravelPrep, Halt, Wait, Idle, Prep, Orient180imu} machineState;
 		machineState state;
 		machineState prevState;
 		int LorR, numRot, count, cycleCount, ir0, ir1;

@@ -18,14 +18,14 @@ namespace autonomous_control{
 		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
 		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this);
 		idle = nh.subscribe("robot/autonomy/enable", 1, &AutonomousControl::Idleing,this);
-		feedback = nh.subscribe("robot/autonomy/feedback", 1, &AutonomousControl::Feedback, this);
+		feedback = nh.subscribe("robot/motor/feedback", 1, &AutonomousControl::Feedback, this);
 		ir0sub = nh.subscribe("IR0", 1, &AutonomousControl::IR0, this);
 		ir1sub = nh.subscribe("IR1", 1, &AutonomousControl::IR1, this);
 
 		ROSCONSOLE_AUTOINIT;
 		log4cxx::LoggerPtr my_logger = log4cxx::Logger::getLogger(ROSCONSOLE_DEFAULT_NAME);
 		my_logger->setLevel(ros::console::g_level_lookup[ros::console::levels::Debug]);
-		
+
 
 		/*motor_command.leftRatio = 0.0;
 		motor_command.rightRatio = 0.0;
@@ -53,12 +53,13 @@ namespace autonomous_control{
 		LorR = 0;
 		numRot = 0;
 		imuForward = 0;
-		angleTargeted= false;  
+		angleTargeted= false;
 		faceForward = false;  // bool used to check whether bot is facing forward
-		forwardRatio = 0.2; 
-		backwardRatio = -0.2; 
+		forwardRatio = 0.14;
+		backwardRatio = -0.14;
 		brake = 0.0;
 
+		inObsField = false;	//boolean used to switch back to obstacle field case after relocating beacon
 		count = 0;
 		waitComplete = false;
 		cycleCount = 0;
@@ -75,7 +76,7 @@ namespace autonomous_control{
 		liftUpperLimit = 50;
 
 		//ros::Duration(3.0).sleep();
-		ROS_DEBUG_ONCE("Starting Autonomous Control");	
+		ROS_DEBUG_ONCE("Starting Autonomous Control");
 
 	}
 
@@ -98,11 +99,11 @@ namespace autonomous_control{
 		imuX=imu.orientation.x;
 		imuY=imu.orientation.y;
 		imuZ=imu.orientation.z;
-		imuW=imu.orientation.w;		
+		imuW=imu.orientation.w;
 	}
 
 	void AutonomousControl::getLidar(const std_msgs::Empty& empty2){
-		
+
 	}
 
 	void AutonomousControl::getStripe(const std_msgs::Int8MultiArray& stripe){
@@ -144,6 +145,20 @@ namespace autonomous_control{
 				halt();
 				//literaly do nothing at all
 			break;
+
+			case Prep:
+				motor_command.liftDown=false;
+				motor_command.liftUp=true;
+				motor_command.liftSpeed = 5000;
+				hold(20);
+				if(waitComplete){
+					waitComplete=false;
+					count=0;
+					prevState=state;
+					state=FindBeacon;
+				}
+			break;
+
 			case FindBeacon:
 				if(oW != 1.0){
 					motor_command.leftRatio=forwardRatio;
@@ -177,17 +192,19 @@ namespace autonomous_control{
 					tempZ = imuZ;  //Store IMU Angle at halt
 					ROS_DEBUG_STREAM("Tag angle " << oZ);
 					ROS_DEBUG_STREAM("IMU angle " << imuZ);
+					waitComplete = false;
+					count = 0;
 				}
 			break;
 
 			if (moveComplete == false) {
-				case Orient90:				
+				case Orient90:
 					switch (LorR) {
 						case 0:
 						prevState = state;
 							state=Orient180;
 						break;
-					
+
 						case -1:
 							if ( oZStore < 270 - 3 && oZStore > 90) { //This works
 								//Right hand side, facing quadrant 1 or 2
@@ -235,8 +252,8 @@ namespace autonomous_control{
 								}
 							}
 						break;
-					
-						case 1:						
+
+						case 1:
 							if ( oZStore < 270 && oZStore > 90 + 3) { //this works
 								// Left hand side, facing Quadrant 1 or 2
 								target90R(oZStore - 90);
@@ -251,7 +268,7 @@ namespace autonomous_control{
 									state = DriveToCenter;
 									moveComplete = true;
 								}
-							}	
+							}
 							else if ( oZStore> 270) {
 								// Left Hand Side, Facing Quadrant 3
 								target90L(450 - oZStore);
@@ -289,9 +306,27 @@ namespace autonomous_control{
 
 			case DriveToCenter:
 				ROS_DEBUG_ONCE("I'm driving to the center");
-				if(posX < -0.2 || posX > 0.2){
-					motor_command.rightRatio=forwardRatio;
-					motor_command.leftRatio=forwardRatio;
+				if(LorR == -1){
+					if(posX < 0.0 ){
+						motor_command.rightRatio=forwardRatio;
+						motor_command.leftRatio=forwardRatio;
+					}
+					else{
+						halt();
+						prevState = state;
+						state = Orient180;
+					}
+				}
+				else if(LorR == 1){
+					if(posX > 0.0){
+						motor_command.rightRatio=forwardRatio;
+						motor_command.leftRatio=forwardRatio;
+					}
+					else{
+						halt();
+						prevState = state;
+						state = Orient180;
+					}
 				}
 				else{
 					halt();
@@ -309,38 +344,56 @@ namespace autonomous_control{
 					motor_command.leftRatio = backwardRatio;
 					}
 					else{
-					halt();
-					state=DriveToObsField;
-					updateIMU();
-					imuForward = newZ;
-					faceForward = true;
-					state = prevState;
-					prevState = Orient180;
+						halt();
+						state=DriveToObsField;
+						updateIMU();
+						imuForward = newZ;
+						faceForward = true;
+						prevState = Orient180;
+						if(inObsField == false){
+							state = DriveToObsField;
+						}
+						else{
+							state=DriveToMine;
+						}
 					}
 				}
 				else if(oZ > 183) {
 					target180(180-oZ);
 					if(newZ > targetAng){
-					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
+					ROS_DEBUG_ONCE("Turning Right to Face Forward");
 					motor_command.rightRatio = backwardRatio;
 					motor_command.leftRatio = forwardRatio;
 					}
 					else{
-					halt();
-					//state=DriveToObsField;
-					state = DriveToMine;
-					updateIMU();
-					imuForward = newZ;
-					faceForward = true;
-					state = prevState;
-					prevState = Orient180;					
+						halt();
+						//state=DriveToObsField;
+						state = DriveToMine;
+						updateIMU();
+						imuForward = newZ;
+						faceForward = true;
+						prevState = Orient180;
+						if(inObsField == false){
+							state = DriveToObsField;
+						}
+						else{
+							state = DriveToMine;
+						}
 					}
+				}
+				if(inObsField == false){
+					state = DriveToObsField;
+				}
+				else{
+					state = DriveToMine;
 				}
 			break;
 
-			case Orient180imu:  //This case is called to target the forward angle when apriltags are NOT in sight.  
+			case Orient180imu:  //This case is called to target the forward angle when apriltags are NOT in sight.
 								//Note that this can only be called once the imu is calibrated (using previous vision of the tag)
-				if(oZ < 177){
+				updateIMU();
+			//	if(oZ < 177){
+				if(newZ < (imuForward-7.0)){
 					target180(imuForward - newZ);
 					if(newZ < imuForward){
 					ROS_DEBUG_ONCE("Turning Left to Face Forward");
@@ -353,10 +406,11 @@ namespace autonomous_control{
 					prevState = Orient180imu;
 					}
 				}
-				else if(oZ > 183) {
+			//	else if(oZ > 183) {
+				else if(newZ>(imuForward+7.0)){
 					target180(imuForward - newZ);
 					if(newZ > imuForward){
-					ROS_DEBUG_ONCE("Turning Right to Face Forward");	
+					ROS_DEBUG_ONCE("Turning Right to Face Forward");
 					motor_command.rightRatio = backwardRatio;
 					motor_command.leftRatio = forwardRatio;
 					}
@@ -371,6 +425,7 @@ namespace autonomous_control{
 
 			case DriveToObsField:
 				ROS_DEBUG_ONCE("Driving to Start of Obstacle Field");
+				updateIMU();
 				if(posY < obsFieldStart){
 					motor_command.rightRatio=forwardRatio;
 					motor_command.leftRatio=forwardRatio;
@@ -383,8 +438,10 @@ namespace autonomous_control{
 
 			case DriveToMine:
 				// if oW exists, use orient 180 case, otherwise use orient180imu case.
-				prevState = state;
-				if(posY < 5){					
+				//prevState = state;
+				updateIMU();
+				inObsField = true;
+				/*if(posY < 5){
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = forwardRatio;
 					hold(10);
@@ -402,15 +459,38 @@ namespace autonomous_control{
 							break;
 						}
 					}
-					
+
+				}*/
+				// if imu slips more than 10 degrees from recored forward value, reorient
+				// if posx is more than 80 cm, recenter
+				if(posY < 5){
+					motor_command.rightRatio = forwardRatio;
+					motor_command.leftRatio = forwardRatio;
+					if(newZ<(imuForward-10)){
+						halt();
+						state = Orient180imu;
+						break;
+					}
+					else if (newZ>(imuForward+10)){
+						halt();
+						state = Orient180imu;
+						break;
+					}
+					else if (posX>1.0){
+						halt();
+						state = FindBeacon;
+						break;
+					}
+					else if (posX<-1.0){
+						halt();
+						state = FindBeacon;
+						break;
+					}
 				}
 				else{
 					halt();
-					waitComplete = false;
-					count = 0;
 					prevState = state;
-					state = Mining; 
-					
+					state = Mining;
 				}
 			break;
 
@@ -423,33 +503,42 @@ namespace autonomous_control{
 				if (liftPos>liftLowerLimit){
 					motor_command.liftDown = true;
 					motor_command.liftUp = false;
+					motor_command.liftSpeed = 5000;
 				}
-				hold(100);
+				hold(40);
 				if(waitComplete){
 					motor_command.drumRatio=brake;
 					motor_command.liftDown = false;
 					motor_command.liftUp = true;
+					motor_command.liftSpeed = 5000;
+					state = Deposit;
+				}
+			break;
+
+			case DepositPrep:
+				motor_command.liftUp = true;
+				motor_command.liftDown = false;
+				hold(30);
+				if(waitComplete){
+					waitComplete = false;
+					count = 0;
+					motor_command.liftUp = false;
+					motor_command.liftDown = false;
+					prevState = state;
 					state = Deposit;
 				}
 			break;
 
 			case Deposit:
-				if(liftPos<liftUpperLimit){
-					motor_command.liftUp = true;
-					motor_command.liftDown = false;
-				}
-				else{
-					motor_command.liftUp = false;
-					motor_command.liftDown = false;
-					//reverse drum
-					motor_command.drumRatio=drumReverse;
-					hold(30);
-					if(waitComplete){
-						halt();
-						state = ReturnToObs;
-						waitComplete = false;
-						count = 0;
-					}
+				//reverse drum
+				motor_command.drumRatio=drumReverse;
+				hold(30);
+				if(waitComplete){
+					halt();
+					prevState = state;
+					state = ReturnToObs;
+					waitComplete = false;
+					count = 0;
 				}
 			break;
 
@@ -548,7 +637,6 @@ namespace autonomous_control{
 				ROS_DEBUG_ONCE("HALT!");
 				halt();
 			break;
-			
 
 
 			default:
@@ -558,7 +646,7 @@ namespace autonomous_control{
 		mappingSignal.publish(mapPub);  // Mapping Signal for Arduino
 		motor_command_.publish(motor_command);
 		oW = 0.0;  // Reset the apriltag boolean so we can track whether tags are in vision or not
-		
+
 		/*if(!detected){
 			motor_command.leftRatio = 150;
 			motor_command.rightRatio = 150;
@@ -589,11 +677,11 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::LOrR(){
-		if (posX < -0.25) {     //right
+		if (posX < -0.15) {     //right
 			LorR = -1;
 			ROS_DEBUG_ONCE("I'm on the right (negative x)");
 		}
-		else if (posX > 0.25) { //left
+		else if (posX > 0.15) { //left
 			LorR = 1;
 			ROS_DEBUG_ONCE("I'm on the left (positive x)");
 		}
@@ -609,7 +697,7 @@ namespace autonomous_control{
 			ROS_DEBUG_STREAM("Target angle " << targetAng);
 		}
 		updateIMU();
-		
+
 		turn = false;
 	}
 
@@ -628,7 +716,7 @@ namespace autonomous_control{
 	void AutonomousControl::updateIMU(){
 		prevZ = tempZ -360*numRot;
 		tempZ = imuZ;
-		
+
 
 
 		if ((prevZ >= 270.00 && prevZ <= 360.00)&&(tempZ>=0.0 && tempZ <=90.0)) {
@@ -642,7 +730,7 @@ namespace autonomous_control{
 			ROS_DEBUG_ONCE("IMU negative turn over");
 		}
 		else{
-			newZ = tempZ + 360*numRot;			
+			newZ = tempZ + 360*numRot;
 		}
 		//ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
 	}
@@ -651,7 +739,7 @@ namespace autonomous_control{
 		oZStore = oZ;
 		ROS_DEBUG_STREAM("Storing Orientation of " << oZStore);
 		moveComplete = false;
-	}                    
+	}
 
 	void AutonomousControl::target180(float desired){
 		updateIMU();
@@ -660,7 +748,7 @@ namespace autonomous_control{
 			ROS_DEBUG_STREAM("Turning Forward by " << targetAng);
 		}
 		angleTargeted = true;
-		
+
 	}
 
 
@@ -677,4 +765,4 @@ namespace autonomous_control{
 
 
 }
-	
+

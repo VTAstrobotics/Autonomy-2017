@@ -13,18 +13,18 @@ namespace cam_data_filter{
 		R = nh.subscribe("right/tag_detections", 1, &CamDataFilter::rConvert,this);
 		B = nh.subscribe("back/tag_detections", 1, &CamDataFilter::bConvert,this);
 
-		oneOffset =.198;
-		twoOffset = .394;
-		threeOffset =-.194;
-		fourOffset =-.386;
-		/*oneOffset = 1.5;
+		/*oneOffset = .335;
+		twoOffset = .185;
+		threeOffset = .195;
+		fourOffset = .335;*/
+		oneOffset = 1.5;
 		twoOffset = 1.5;
 		threeOffset = 1.5;
-		fourOffset = 1.5;*/
+		fourOffset = 1.5;
 	}
 	void CamDataFilter::lConvert(const apriltags_ros::AprilTagDetectionArray& array){
 		if(array.detections.size() > 0){
-			int id = array.detections[0].id;
+			int id = array.detections;
 			bool found = false;
 
 			apriltags_ros::MetaPose pose2;
