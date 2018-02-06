@@ -9,14 +9,14 @@ namespace autonomous_control{
 
 	AutonomousControl::AutonomousControl(ros::NodeHandle& nh)
 	{
-		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);
-		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1);
-		cali_command_ = nh.advertise<std_msgs::Bool>("cali_command",1);
-		mappingSignal = nh.advertise<std_msgs::Bool>("startMapping",1);
-		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
-		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this);
-		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
-		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this);
+		pub = nh.advertise<apriltags_ros::MetaPose>("/tag_check",1);   //publish april tag data
+		motor_command_ = nh.advertise<robot_msgs::Autonomy>("/robot/autonomy",1); //motor command data
+		cali_command_ = nh.advertise<std_msgs::Bool>("cali_command",1); //calibration data
+		mappingSignal = nh.advertise<std_msgs::Bool>("startMapping",1); //mapping data
+		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this); //recieve cam data
+		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this); //recieve imu data
+		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this); //recieve lidar data
+		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this); //determine stripe array
 		idle = nh.subscribe("robot/autonomy/enable", 1, &AutonomousControl::Idleing,this);
 		feedback = nh.subscribe("robot/motor/feedback", 1, &AutonomousControl::Feedback, this);
 		ir0sub = nh.subscribe("IR0", 1, &AutonomousControl::IR0, this);
@@ -32,7 +32,7 @@ namespace autonomous_control{
 		motor_command.digCmd = 0.0;
 		motor_command.dumpCmd = 0.0;*/
 
-		posX = 0.0;
+		posX = 0.0;   //set initial data
 		posY = 0.0;
 		posZ = 0.0;
 		oX = 0.0;
@@ -62,6 +62,7 @@ namespace autonomous_control{
 		inObsField = false;	//boolean used to switch back to obstacle field case after relocating beacon
 		count = 0;
 		waitComplete = false;
+		moveComplete = false;
 		cycleCount = 0;
 
 		mapPub.data = false;
@@ -81,7 +82,7 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::tag_seen(const apriltags_ros::MetaPose& pose){
-		posX = pose.pose.position.x;
+		posX = pose.pose.position.x;   //determine orientation of the robot
 		posY = pose.pose.position.y;
 		posZ = pose.pose.position.z;
 		oX = pose.pose.orientation.x;
@@ -96,14 +97,17 @@ namespace autonomous_control{
 	}
 
 	void AutonomousControl::getImu(const sensor_msgs::Imu& imu){
-		imuX=imu.orientation.x;
+		imuX=imu.orientation.x;  //recieve Imu data
 		imuY=imu.orientation.y;
 		imuZ=imu.orientation.z;
 		imuW=imu.orientation.w;
 	}
 
-	void AutonomousControl::getLidar(const std_msgs::Empty& empty2){
-
+	void AutonomousControl::getLidar(const std_msgs::Lidar& lidar){
+		lidarX=lidar.orientation.x;  //recieve Imu data
+		lidarY=lidar.orientation.y;
+		lidarZ=lidar.orientation.z;
+		lidarW=lidar.orientation.w;
 	}
 
 	void AutonomousControl::getStripe(const std_msgs::Int8MultiArray& stripe){
@@ -126,7 +130,7 @@ namespace autonomous_control{
 		drumRPM = mf.drumRPM;
 		liftPos = mf.liftPos;
 	}
-
+  /*
 	void AutonomousControl::IR0(const std_msgs::Int8& val){
 		ir0=val.data;
 	}
@@ -134,7 +138,7 @@ namespace autonomous_control{
 	void AutonomousControl::IR1(const std_msgs::Int8& val){
 		ir1=val.data;
 	}
-
+  */
 	void AutonomousControl::primary(){
 		updateIMU();
 		if(!go){
@@ -143,7 +147,9 @@ namespace autonomous_control{
 		switch(state){
 			case Idle:
 				halt();
-				//literaly do nothing at all
+				waitComplete = true;
+				prevState = state
+				state = Prep;
 			break;
 
 			case Prep:
@@ -155,27 +161,30 @@ namespace autonomous_control{
 					waitComplete=false;
 					count=0;
 					prevState=state;
-					state=FindBeacon;
+					state=sensorIntialization;
 				}
 			break;
 
-			case FindBeacon:
-				if(oW != 1.0){
+			case sensorIntialization: //initialization
+				if(oW != 1.0 && lidarW != 1.0){  //W direction from april tag and lidar data
 					motor_command.leftRatio=forwardRatio;
 					motor_command.rightRatio=backwardRatio;
 					cali_command_.publish(cali);
+          status_command_.publish(status);
 					cali.data=false;
 					ROS_DEBUG_ONCE("Looking for Target");
 					ROS_DEBUG_ONCE("Calibrating lidar");
 				}
-				else{
-					//ros::Duration(2.0).sleep(); // sleep for two seconds
+				else{  //otherwise
+					ros::Duration(2.0).sleep(); // sleep for two seconds
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
 					turn = true;
 					waitComplete = false;
+					if(status){
 					prevState = state;
 					state=Wait;
+				}
 					ROS_DEBUG_ONCE("Found Target");
 					halt();
 					break;
@@ -306,6 +315,7 @@ namespace autonomous_control{
 
 			case DriveToCenter:
 				ROS_DEBUG_ONCE("I'm driving to the center");
+				status_command_.publish(status);
 				if(LorR == -1){
 					if(posX < 0.0 ){
 						motor_command.rightRatio=forwardRatio;
@@ -424,6 +434,7 @@ namespace autonomous_control{
 			break;
 
 			case DriveToObsField:
+			status_command_.publish(status);
 				ROS_DEBUG_ONCE("Driving to Start of Obstacle Field");
 				updateIMU();
 				if(posY < obsFieldStart){
@@ -437,6 +448,7 @@ namespace autonomous_control{
 			break;
 
 			case DriveToMine:
+			status_command_.publish(status);
 				// if oW exists, use orient 180 case, otherwise use orient180imu case.
 				//prevState = state;
 				updateIMU();
@@ -478,12 +490,12 @@ namespace autonomous_control{
 					}
 					else if (posX>1.0){
 						halt();
-						state = FindBeacon;
+						state = sensorIntialization;
 						break;
 					}
 					else if (posX<-1.0){
 						halt();
-						state = FindBeacon;
+						state = sensorIntialization;
 						break;
 					}
 				}
@@ -493,8 +505,6 @@ namespace autonomous_control{
 					state = Mining;
 				}
 			break;
-
-
 
 			case Mining:
 				//forward drum
@@ -765,4 +775,3 @@ namespace autonomous_control{
 
 
 }
-
