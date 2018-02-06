@@ -119,7 +119,7 @@ namespace autonomous_control{
 		ROS_INFO_STREAM("go command is "<<go);
 		if(cmd.data && startup){
 			ROS_INFO_STREAM("go command is "<<go);
-			state=FindBeacon;
+			state=sensorIntialization;
 			startup = false;
 		}
 	}
@@ -166,7 +166,7 @@ namespace autonomous_control{
 			break;
 
 			case sensorIntialization: //initialization
-				if(oW != 1.0 && lidarW != 1.0){  //W direction from april tag and lidar data
+				if(oW != 1.0 {  //W direction from april tag
 					motor_command.leftRatio=forwardRatio;
 					motor_command.rightRatio=backwardRatio;
 					cali_command_.publish(cali);
@@ -175,7 +175,7 @@ namespace autonomous_control{
 					ROS_DEBUG_ONCE("Looking for Target");
 					ROS_DEBUG_ONCE("Calibrating lidar");
 				}
-				else{  //otherwise
+				else {  //otherwise
 					ros::Duration(2.0).sleep(); // sleep for two seconds
 					imuForward = imuZ + 180 - oZ;  //Calculate forward IMU Angle
 					LOrR();
@@ -193,7 +193,7 @@ namespace autonomous_control{
 
 			case Wait:
 				hold(20);
-				if (waitComplete){
+				if (waitComplete) {
 					updateIMU();
 					updateTag();
 					prevState = state;
@@ -316,17 +316,18 @@ namespace autonomous_control{
 			case DriveToCenter:
 				ROS_DEBUG_ONCE("I'm driving to the center");
 				status_command_.publish(status);
-				if(LorR == -1){
-					if(posX < 0.0 ){
-						motor_command.rightRatio=forwardRatio;
-						motor_command.leftRatio=forwardRatio;
+				if(status.robotCodeActive == true && status.autonomyActive) {
+					if(LorR == -1){
+						if(posX < 0.0 ){
+							motor_command.rightRatio=forwardRatio;
+							motor_command.leftRatio=forwardRatio;
+						}
 					}
-					else{
+					else {
 						halt();
 						prevState = state;
 						state = Orient180;
 					}
-				}
 				else if(LorR == 1){
 					if(posX > 0.0){
 						motor_command.rightRatio=forwardRatio;
@@ -343,6 +344,10 @@ namespace autonomous_control{
 					prevState = state;
 					state=Orient180;
 				}
+			}
+			else{
+				//reboot
+			}
 			break;
 
 			case Orient180:  //This case is called to target the forward angle when apriltags are in sight
@@ -594,7 +599,7 @@ namespace autonomous_control{
 				motor_command.liftDown=true;
 				motor_command.liftUp=false;
 				hold(30);
-				if(waitComplete){
+				if(waitComplete) {
 					state = Dump;
 					motor_command.liftDown=false;
 					motor_command.liftUp=false;
@@ -723,11 +728,9 @@ namespace autonomous_control{
 
 
 
-	void AutonomousControl::updateIMU(){
+	void AutonomousControl::updateIMU() {
 		prevZ = tempZ -360*numRot;
 		tempZ = imuZ;
-
-
 
 		if ((prevZ >= 270.00 && prevZ <= 360.00)&&(tempZ>=0.0 && tempZ <=90.0)) {
 			numRot = numRot+1;
@@ -745,6 +748,7 @@ namespace autonomous_control{
 		//ROS_INFO_STREAM("Updated IMU Angle is " << newZ);
 	}
 
+
 	void AutonomousControl::updateTag(){
 		oZStore = oZ;
 		ROS_DEBUG_STREAM("Storing Orientation of " << oZStore);
@@ -760,8 +764,6 @@ namespace autonomous_control{
 		angleTargeted = true;
 
 	}
-
-
 	void AutonomousControl::hold(int waitTime){
 		ROS_INFO_STREAM("waitTime " << waitTime);
 		ROS_INFO_STREAM("count " << count);
