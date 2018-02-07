@@ -4,7 +4,7 @@
 #include <XmlRpcException.h>
 #include <ros/console.h>
 #include <log4cxx/logger.h>
-
+#include <iostream>
 namespace autonomous_control{
 
 	AutonomousControl::AutonomousControl(ros::NodeHandle& nh)
@@ -48,7 +48,7 @@ namespace autonomous_control{
 		imuZ=0.0;
 		imuW=0.0;
 		prevZ=0.0;
-		state = Idle;
+		state = Prep;
 		prevState = state;
 		LorR = 0;
 		numRot = 0;
@@ -137,15 +137,18 @@ namespace autonomous_control{
 
 	void AutonomousControl::primary(){
 		updateIMU();
-		if(!go){
-			state = Idle;
-		}
+                // std::cout << state << "before case"<< std::endl;
+	//	if(!go){
+	//		state = Idle;
+	//	}
 		switch(state){
 			case Idle:
 				halt();
-				//literaly do nothing at all
+			  //    	waitComplete = true;
+     			//	prevState = state;
+			//	state = Prep;
 			break;
-
+                       
 			case Prep:
 				motor_command.liftDown=false;
 				motor_command.liftUp=true;
@@ -158,7 +161,7 @@ namespace autonomous_control{
 					state=FindBeacon;
 				}
 			break;
-
+                       // std::cout << state << "before case" << std::endl;
 			case FindBeacon:
 				if(oW != 1.0){
 					motor_command.leftRatio=forwardRatio;
@@ -466,26 +469,26 @@ namespace autonomous_control{
 				if(posY < 5){
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = forwardRatio;
-					if(newZ<(imuForward-10)){
+					if(newZ<(imuForward-10) || newZ>(imuForward+10)){
 						halt();
 						state = Orient180imu;
 						break;
 					}
-					else if (newZ>(imuForward+10)){
-						halt();
-						state = Orient180imu;
-						break;
-					}
-					else if (posX>1.0){
-						halt();
-						state = FindBeacon;
-						break;
-					}
-					else if (posX<-1.0){
+//					else if (newZ>(imuForward+10)){
+//						halt();
+//						state = Orient180imu;
+//						break;
+//					}
+					else if (posX>1.0 || posX <-1.0){
 						halt();
 						state = FindBeacon;
 						break;
 					}
+//					else if (posX<-1.0){
+//						halt();
+//						state = FindBeacon;
+//						break;
+//					}
 				}
 				else{
 					halt();
