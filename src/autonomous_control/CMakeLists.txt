@@ -138,6 +138,7 @@ add_library(autonomous_control
 
 ## Declare a C++ executable
 add_executable(autonomous_control_node src/autonomous_control_node.cpp)
+add_executable(test_publish src/test_publish.cpp)
 ##add_executable(obstacle_testing_node src/obstacle_testing_node.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -148,7 +149,7 @@ add_executable(autonomous_control_node src/autonomous_control_node.cpp)
    autonomous_control
    ${catkin_LIBRARIES}
 )
-
+target_link_libraries(test_publish ${catkin_LIBRARIES})
 
 
 #############

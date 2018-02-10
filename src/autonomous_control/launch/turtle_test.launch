@@ -1,0 +1,10 @@
+<launch>
+	<node
+		name="test_publish"
+		pkg="autonomous_control"
+		type="test_publish"
+		respawn="true"
+		
+	/>
+</launch>
+
