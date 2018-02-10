@@ -138,9 +138,9 @@ namespace autonomous_control{
 	void AutonomousControl::primary(){
 		updateIMU();
                 // std::cout << state << "before case"<< std::endl;
-	//	if(!go){
-	//		state = Idle;
-	//	}
+		if(!go){
+			state = Idle;
+		}
 		switch(state){
 			case Idle:
 				halt();
