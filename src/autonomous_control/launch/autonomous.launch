@@ -1,6 +1,4 @@
 <launch>
-
-
     <group ns="right">
       <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" respawn="true" >
       <param name="video_device" value="/dev/video-cam1" />
@@ -212,11 +210,14 @@
 -->
   <!--
   <node pkg="line_stripe" name="stripey" type="stripey.py" output="screen"/>
-  -->
+
+
 	<node
 		pkg="autonomous_control"
 		type="test_publish"
 		name="test_publish"
 		respawn="true"
 	/>
+-->
+
 </launch>

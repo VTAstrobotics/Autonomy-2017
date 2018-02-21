@@ -15,7 +15,7 @@ namespace autonomous_control{
 		mappingSignal = nh.advertise<std_msgs::Bool>("startMapping",1);
 		camSub = nh.subscribe("filteredCamData", 1, &AutonomousControl::tag_seen,this);
 		imuSub = nh.subscribe("imu/converted", 1, &AutonomousControl::getImu,this);
-		lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
+	//	lidarSweep = nh.subscribe("lidarSweep", 1, &AutonomousControl::getLidar,this);
 		stripeArray = nh.subscribe("stripe_obs_array", 1, &AutonomousControl::getStripe,this);
 		idle = nh.subscribe("robot/autonomy/enable", 1, &AutonomousControl::Idleing,this);
 		feedback = nh.subscribe("robot/motor/feedback", 1, &AutonomousControl::Feedback, this);
@@ -101,11 +101,11 @@ namespace autonomous_control{
 		imuZ=imu.orientation.z;
 		imuW=imu.orientation.w;
 	}
-
+/*
 	void AutonomousControl::getLidar(const std_msgs::Lidar& lidar){
 
 	}
-
+*/
 	void AutonomousControl::getStripe(const std_msgs::Int8MultiArray& stripe){
 
 	}
@@ -138,15 +138,15 @@ namespace autonomous_control{
 	void AutonomousControl::primary(){
 		updateIMU();
                 // std::cout << state << "before case"<< std::endl;
-		if(!go){
-			state = Idle;
+		if(!go) {
+			state = Idle; // changes back to idle as long as not go
 		}
-		switch(state){
+		switch(state) {
 			case Idle:
 				halt();
-			  //    	waitComplete = true;
-     			//	prevState = state;
-			//	state = Prep;
+			      	waitComplete = true;
+     				prevState = state;
+				state = Prep;
 			break;
                        
 			case Prep:
