@@ -353,9 +353,11 @@ namespace autonomous_control{
 						imuForward = newZ;
 						faceForward = true;
 						prevState = Orient180;
+						/* this is getting run after the if statements
 						if(inObsField){
 							state = DriveToMine;
 						}
+						*/
 					}
 				}
 				else if(oZ > 183) {
@@ -373,14 +375,14 @@ namespace autonomous_control{
 						imuForward = newZ;
 						faceForward = true;
 						prevState = Orient180;
-						if(inObsField == false){
-							state = DriveToObsField;
-						}
-						else{
+						/* this is getting run after the if statements
+						if(inObsField){
 							state = DriveToMine;
 						}
+						*/
 					}
 				}
+				// being run and checked here
 				if(inObsField == false){
 					state = DriveToObsField;
 				}
