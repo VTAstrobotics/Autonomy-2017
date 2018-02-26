@@ -348,7 +348,7 @@ namespace autonomous_control{
 					}
 					else{
 						halt();
-						state=DriveToObsField;
+						state = DriveToObsField;
 						updateIMU();
 						imuForward = newZ;
 						faceForward = true;
@@ -370,7 +370,7 @@ namespace autonomous_control{
 					else{
 						halt();
 						//state=DriveToObsField;
-						state = DriveToMine;
+						state = DriveToObsField;
 						updateIMU();
 						imuForward = newZ;
 						faceForward = true;
@@ -383,11 +383,14 @@ namespace autonomous_control{
 					}
 				}
 				// being run and checked here
-				if(inObsField == false){
-					state = DriveToObsField;
-				}
-				else{
+				// check to see if we're in the obstacle
+				if(inObsField){
+					prevState = state;
 					state = DriveToMine;
+				}
+				else{ // we are not in the obstacle field
+					prevState = state;
+					state = DriveToObsField;
 				}
 			break;
 
