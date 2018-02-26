@@ -148,7 +148,7 @@ namespace autonomous_control{
      				prevState = state;
 				state = Prep;
 			break;
-                       
+
 			case Prep:
 				motor_command.liftDown=false;
 				motor_command.liftUp=true;
@@ -353,11 +353,8 @@ namespace autonomous_control{
 						imuForward = newZ;
 						faceForward = true;
 						prevState = Orient180;
-						if(inObsField == false){
-							state = DriveToObsField;
-						}
-						else{
-							state=DriveToMine;
+						if(inObsField){
+							state = DriveToMine;
 						}
 					}
 				}
@@ -425,8 +422,8 @@ namespace autonomous_control{
 					}
 				}
 			break;
-		//Arduino sends lidar data from the NUC and that sends data to the Beaglebone black 
-		//have to write ROS code in obstacle algo v10  
+		//Arduino sends lidar data from the NUC and that sends data to the Beaglebone black
+		//have to write ROS code in obstacle algo v10
 			case DriveToObsField:
 				ROS_DEBUG_ONCE("Driving to Start of Obstacle Field");
 				updateIMU();
@@ -769,4 +766,3 @@ namespace autonomous_control{
 
 
 }
-
