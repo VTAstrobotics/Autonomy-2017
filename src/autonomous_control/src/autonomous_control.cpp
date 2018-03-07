@@ -619,6 +619,7 @@ namespace autonomous_control{
 					waitComplete=false;
 					count=0;
 					halt();
+					//state = TravelPrep;
 				}
 			break;
 
