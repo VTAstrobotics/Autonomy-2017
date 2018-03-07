@@ -2,7 +2,7 @@
 #define MOVE_H
 
 // right means to the right if the robot is facing mining area
-enum Direction {RIGHT, LEFT, TOWARDS_MINE, TOWARDS_BIN, };
+enum Direction {RIGHT, LEFT, TOWARDS_MINE, TOWARDS_BIN};
 
 class Move{
 private:
