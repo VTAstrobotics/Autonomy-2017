@@ -10,17 +10,19 @@ a path for the robot to move in
 class Path{
 private:
   double pathDistance;
-  vector<Move> thisPath; // creates a vector full of moves
+  vector<Move> thisPath; // creates a vector of moves
 
 public:
   Path(); // constructor for class
-  void addMove(Move aMove);
+  void addMove(Move aMove); // adds a move to the path
 
   // accessor methods
   vector<Move> getPath();
-  double getDistance();
+  double getPathDistance(); // returns the distance of path
 
+  // decision methods
+  void calcDistance(int robotRow, int robotCol, int mineRow,int mineCol);
+  void choseMove(); // decides on which direction to move in
 
 };
-
 #endif
