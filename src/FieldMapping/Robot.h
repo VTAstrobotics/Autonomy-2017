@@ -8,7 +8,8 @@ private:
   int xPos;
   int yPos;
   const char SYMBOL = '$'; // money team baby
-
+  Path shortestPath; // path to take
+  Path tempPath; // path to compare to shortest
 public:
   Robot(); // constructor to create Robot
   // accessor methods
@@ -20,6 +21,6 @@ public:
   void setRow(int xPos);
   void setCol(int yPos);
 
-}
+};
 
 #endif
