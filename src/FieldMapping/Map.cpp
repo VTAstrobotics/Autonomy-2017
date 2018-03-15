@@ -1,7 +1,7 @@
 #include "Map.h"
 
 // creates constructor for the class
-Map::Map(){
+Map::Map(Robot& robot){
   // create the robot
   this->robot();
 

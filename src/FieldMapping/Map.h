@@ -17,9 +17,10 @@ private:
   const char obstacle = 'X'; // obstacle to be placed on the map
   const char openSpace = ' '; // space to fill the map with initially
   char[ROWS][COLS] map; // map of the field
+  Robot thisRobot; // robot to be used
 
 public:
-  Map(); // constructor, initiallizes the map
+  Map(Robot& robot); // constructor, initiallizes the map
   char charAt(int row, int col); // returns char at given index
   void setSquare(int row, int col, char piece); // sets index to a char
 };

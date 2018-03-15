@@ -10,6 +10,8 @@ private:
   const char SYMBOL = '$'; // money team baby
   Path shortestPath; // path to take
   Path tempPath; // path to compare to shortest
+  bool inMiningField;
+
 public:
   Robot(); // constructor to create Robot
   // accessor methods

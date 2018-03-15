@@ -11,18 +11,20 @@ class Path{
 private:
   double pathDistance;
   vector<Move> thisPath; // creates a vector of moves
+  // decision methods
+  void calcDistance(int robotRow, int robotCol, int mineCol);
+  void addMove(Move aMove); // adds a move to the path
 
 public:
   Path(); // constructor for class
-  void addMove(Move aMove); // adds a move to the path
+  void createPath(int miningCol); // create the best path to the position
 
   // accessor methods
   vector<Move> getPath();
   double getPathDistance(); // returns the distance of path
 
-  // decision methods
-  void calcDistance(int robotRow, int robotCol, int mineRow,int mineCol);
-  void choseMove(); // decides on which direction to move in
+  
+  
 
 };
 #endif
