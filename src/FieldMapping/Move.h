@@ -3,15 +3,15 @@
 #define MOVE_H
 
 /*
-This class will define the next move of the robot. We will
-gain access to the map by inheriting from the Map class
+This class will define the next move of the robot. It will give a direction for
+the move and will give
 */
 class Move{
 private:
   Direction direction; // direction of the move
-  double distance;
+  double distance; // distance traveled in meters
 public:
-  Move(); // constructor
+  Move(); // constructor for a move object
 
   // accessor methods
   void setDirection(Direction datWay);
