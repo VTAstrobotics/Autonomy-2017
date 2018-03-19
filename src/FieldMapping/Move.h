@@ -4,23 +4,19 @@
 
 /*
 This class will define the next move of the robot. It will give a direction for
-the move and will give
+the move. All movements are the same distance.
 */
 class Move{
 private:
   Direction direction; // direction of the move
-  double distance; // distance traveled in meters
 public:
   Move(); // constructor for a move object
 
   // accessor methods
   void setDirection(Direction datWay);
-  void setDistance(double dist);
 
   // mutator methods
   Direction getDirection();
-  double getDistance();
-
 };
 
 

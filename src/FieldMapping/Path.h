@@ -1,5 +1,4 @@
 #include "AutonomyMap.h"
-
 #ifndef PATH_H
 #define PATH_H
 
@@ -21,10 +20,10 @@ public:
 
   // accessor methods
   vector<Move> getPath();
-  double getPathDistance(); // returns the distance of path
+  int getPathDistance(); // returns the distance of path
 
-  
-  
+
+
 
 };
 #endif
