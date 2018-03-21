@@ -9,4 +9,4 @@ using std::cout;
 using std::cin;
 
 // right means to the right if the robot is facing mining area
-enum Direction {RIGHT, LEFT, TOWARDS_MINE, TOWARDS_BIN};
+enum Direction {RIGHT, LEFT, TOWARDS_MINE, TOWARDS_BIN, NOT_DETERMINED};

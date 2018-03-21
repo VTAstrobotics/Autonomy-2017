@@ -12,10 +12,10 @@ private:
 public:
   Move(); // constructor for a move object
 
-  // accessor methods
+  // mutator methods
   void setDirection(Direction datWay);
 
-  // mutator methods
+  // accessor methods
   Direction getDirection();
 };
 

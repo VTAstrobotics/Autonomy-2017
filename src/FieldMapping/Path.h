@@ -22,8 +22,5 @@ public:
   vector<Move> getPath();
   int getPathDistance(); // returns the distance of path
 
-
-
-
 };
 #endif
