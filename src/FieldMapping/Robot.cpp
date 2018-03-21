@@ -20,12 +20,7 @@ int Robot::getCol(){
   return this->yPos;
 }
 
-/**
-returns the symbol of the robot
-*/
-char Robot::getSymbol(){
-  return this->SYMBOL;
-}
+
 /*
 sets the xPosition of the robot to the newXPos
 */
