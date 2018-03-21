@@ -35,6 +35,8 @@ void PathFinder::autonomyAlgorithm(){
 	runPath();
 }
 
+#include "PathFinder.h"
+
 /*
 constructor that initializes the private member variables
 and sets the pointers to nullptr
