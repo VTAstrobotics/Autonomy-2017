@@ -1,8 +1,6 @@
 #include "Move.h"
 
-Move::Move(){
-  direction = NOT_DETERMINED;
-}
+Move::Move() : direction(NOT_DETERMINED){}
 
 /*
 sets the direction of the move to the param direction
