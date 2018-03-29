@@ -1,4 +1,5 @@
 #include "AutonomyMap.h"
+#include "Move.h"
 #ifndef PATH_H
 #define PATH_H
 
@@ -8,9 +9,9 @@ a path for the robot to move in
 */
 class Path{
 private:
-  double pathDistance;
   vector<Move> thisPath; // creates a vector of moves
-  // decision methods
+
+  // helper methods
   void calcDistance(int robotRow, int robotCol, int mineCol);
   void addMove(Move aMove); // adds a move to the path
 

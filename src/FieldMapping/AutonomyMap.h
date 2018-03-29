@@ -11,10 +11,11 @@
 using std::endl;
 using std::cout;
 using std::cin;
+using std::vector;
 
 const int COLS = 13; // number of columns the field is divided into
 const int ROWS = 25; // number of rows the field is divided into
-const int MINIG_ROW = 15; // row where mining field starts
+const int MINING_ROW = 15; // row where mining field starts
 // right means to the right if the robot is facing mining area
 enum Direction {RIGHT, LEFT, TOWARDS_MINE, TOWARDS_BIN, NOT_DETERMINED};
 

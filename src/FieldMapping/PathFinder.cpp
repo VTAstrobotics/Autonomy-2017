@@ -1,7 +1,17 @@
 #include "AutonomyMap.h"
 #include "PathFinder.h"
 
+/*
+constructor that initializes the private member variables
+and sets the pointers to nullptr
+*/
+PathFinder::PathFinder(){
+  this->robot = Robot robot;
+  this->map = Map map(thisRobot);
 
+  bestPath = nullptr;
+  tempPath = nullptr;
+}
 
 /*
 finds the best path for the robot to take given the position of the robot
@@ -35,19 +45,6 @@ void PathFinder::autonomyAlgorithm(){
 	runPath();
 }
 
-#include "PathFinder.h"
-
-/*
-constructor that initializes the private member variables
-and sets the pointers to nullptr
-*/
-PathFinder::PathFinder(){
-  this->robot = Robot robot;
-  this->map = Map map(thisRobot);
-
-  bestPath = nullptr;
-  tempPath = nullptr;
-}
 
 /*
 iterates through the moves in the Path that bestPath
@@ -57,8 +54,8 @@ to the robot
 void PathFinder::runPath(){
   // get the path and create move pointer
   vector<Move> path = bestPath->getPath();
-  Move *lastMove = nullptr;
-  Move *thisMove = nullptr;
+  Move lastMove = nullptr;
+  Move thisMove = nullptr;
 
   // run through each move
   for(int movement = 0; movement < bestPath->size(); movement++){
