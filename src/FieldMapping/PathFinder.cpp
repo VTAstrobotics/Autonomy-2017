@@ -20,14 +20,14 @@ on the field. Once the best case is established, the robot executes the best pat
 void PathFinder::autonomyAlgorithm(){
 	//prime the loop
 	int miningCol = 0;
-	tempPath->createPath(miningCol);
+	tempPath->createPath(miningCol, map, robot);
 	bestPath = tempPath;
 	miningCol++;
 
 	// more mining paths to find
 	while(miningCol < COL){
 		tempPath = new Path; // create a new path object
-		tempPath->createPath(miningCol, Map map);
+		tempPath->createPath(miningCol, map, robot);
 
 		// get the two distances and compare
 		int tempDistance = tempPath->getPathDistance();
