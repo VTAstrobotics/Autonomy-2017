@@ -57,7 +57,11 @@ vector<Move> Path::getPath(){
 }
 
 /*
-Creates the path to be used
+Creats the path towards a specific miningCol on the field.
+
+@param-robot: used to get the positon of the robot on the Map
+@param-map: map containing the obstacle field. Used to detect spaces with obstacles
+@param-miningCol: the miningCol of the field to go towards
 */
 void Path::createPath(int miningCol, Map map, Robot robot){
   // prime the variables used in the loop
@@ -83,6 +87,11 @@ void Path::createPath(int miningCol, Map map, Robot robot){
 generates the next move to be added to the path. Returns the Direction of the moves
 that should be taken and updates the robot row and robot col based on the direction taken
 
+@param-robotRow: current row of the robot. This will get updated if moved towards mine or bin
+@param-robotCol: current col of the robot. Thiw iwll get updated if moved left or right.
+@param-miningCol: the miningCol that we are trying to reach
+@param-map: map of the obstacle field. This will be used to see if an obstacle is in the position
+@return a Direction enum which will be set to the direction of the nextMove
 */
 Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map){
   int towrdsBin = calcDistance(robotRow-1, robotCol, miningCol, map);
