@@ -14,7 +14,11 @@ private:
   Path *bestPath; // represent the most optimal path to take
   Path *tempPath; // temporary path that we are creating
   void runPath(); // this will get the robot to run the best path
-
+  void moveForward(); // will move the robot forward .8 meters
+  void moveBackward(); // will move teh robot backward .8 meters
+  void turnRight(); // turns the robot 90 degrees to the right
+  void turnLeft(); // turns the robot 90 degrees to the left
+  void turnToDirection(); // turns the robot to the correct Direction 
 
 public:
   PathFinder(); // constructor

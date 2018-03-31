@@ -27,7 +27,7 @@ void PathFinder::autonomyAlgorithm(){
 	// more mining paths to find
 	while(miningCol < COL){
 		tempPath = new Path; // create a new path object
-		tempPath->createPath(miningCol);
+		tempPath->createPath(miningCol, Map map);
 
 		// get the two distances and compare
 		int tempDistance = tempPath->getPathDistance();
@@ -55,18 +55,18 @@ to the robot
 void PathFinder::runPath(){
   // get the path and create move pointer
   vector<Move> path = bestPath->getPath();
-  Move *lastMove = nullptr; // pointers to the different move objects
-  Move *thisMove = nullptr;
+
+  // create a move object and set the robot towards bin
+  Move lastMove = Move;
+  lastMove.setDirection(TOWARDS_BIN);
+  Move thisMove;
 
   // run through each move
   for(int movement = 0; movement < bestPath->size(); movement++){
     // get the move and direction, update last move for comparison
-    lastMove = thisMove;
-    thisMove = &(path[movement]); // get the address of the move
-    if(movement == 0){ // avoid nullptr usage
-      lastMove = thisMove;
-    }
-    Direction moveDirection = thisMove->getDirection();
+    thisMove = path[movement]; // get the move object
+
+    Direction moveDirection = thisMove.getDirection();
 
     // orient in the correct direction and move forward
     switch(moveDirection){
@@ -74,32 +74,34 @@ void PathFinder::runPath(){
       // and make a proper decision on rotation of robot and
       // movement direction
       case RIGHT:
-        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        turnToDirection(lastMove.getDirection(), moveDirection);
         moveForward();
         break;
       case LEFT:
-        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        turnToDirection(lastMove.getDirection(), moveDirection);
         moveForward();
         break;
       case TOWARDS_MINE:
-        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        turnToDirection(lastMove.getDirection(), moveDirection);
         moveForward();
         break;
       case TOWARDS_BIN: // will face towards the mine but go in reverse
-        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        turnToDirection(lastMove.getDirection(), moveDirection);
         moveBackward();
         break;
       case NOT_DETERMINED: default:
         // some error handling case
         break;
     }
+    // reprime the last move
+    lastMove = thisMove;
   }
 }
 
 /*
 Used to turn the robot to the correct position for movement
 */
-void PathFinder::turnToPosition(Direction oldDirection, Direction newDirection){
+void PathFinder::turnToDirection(Direction oldDirection, Direction newDirection){
   // check for each direction
   if(oldDirection == LEFT){
     switch(newDirection){
@@ -180,6 +182,6 @@ void PathFinder::turnRight(){
 /*
 Turns the robot to the left
 */
-void PathFinder::turnRight(){
+void PathFinder::turnLeft(){
 
 }
