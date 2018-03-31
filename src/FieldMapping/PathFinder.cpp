@@ -21,6 +21,7 @@ void PathFinder::autonomyAlgorithm(){
 	//prime the loop
 	int miningCol = 0;
 	tempPath->createPath(miningCol);
+	bestPath = tempPath;
 	miningCol++;
 
 	// more mining paths to find
@@ -54,31 +55,131 @@ to the robot
 void PathFinder::runPath(){
   // get the path and create move pointer
   vector<Move> path = bestPath->getPath();
-  Move lastMove = nullptr;
-  Move thisMove = nullptr;
+  Move *lastMove = nullptr; // pointers to the different move objects
+  Move *thisMove = nullptr;
 
   // run through each move
   for(int movement = 0; movement < bestPath->size(); movement++){
     // get the move and direction, update last move for comparison
     lastMove = thisMove;
     thisMove = &(path[movement]); // get the address of the move
-
+    if(movement == 0){ // avoid nullptr usage
+      lastMove = thisMove;
+    }
     Direction moveDirection = thisMove->getDirection();
-    // determine which way to move motors
+
+    // orient in the correct direction and move forward
     switch(moveDirection){
       // determine what the last case was relative to this case
       // and make a proper decision on rotation of robot and
       // movement direction
       case RIGHT:
+        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        moveForward();
         break;
       case LEFT:
+        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        moveForward();
         break;
       case TOWARDS_MINE:
+        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        moveForward();
         break;
-      case TOWARDS_BIN:
+      case TOWARDS_BIN: // will face towards the mine but go in reverse
+        turnToPosition(lastMove.getDirection(), thisMove.getDirection());
+        moveBackward();
         break;
       case NOT_DETERMINED: default:
+        // some error handling case
         break;
     }
   }
+}
+
+/*
+Used to turn the robot to the correct position for movement
+*/
+void PathFinder::turnToPosition(Direction oldDirection, Direction newDirection){
+  // check for each direction
+  if(oldDirection == LEFT){
+    switch(newDirection){
+      case RIGHT:
+        turnRight();
+        turnRight();
+        break;
+      case TOWARDS_BIN:
+        turnLeft();
+        break;
+      case TOWARDS_MINE:
+        turnRight();
+        break;
+      case default: case LEFT:
+        break; // already in the correct position
+    } // end of switch
+  }
+  if(oldDirection == RIGHT){
+    switch(newDirection){
+      case TOWARDS_MINE: case TOWARDS_BIN:
+        turnLeft();
+        break;
+      case LEFT:
+        turnLeft();
+        turnLeft();
+        break;
+      case RIGHT: case default:
+        break; // in the correct position
+    }
+  }
+  if(oldDirection == TOWARDS_BIN){ // actually facing the mining area
+    switch(newDirection){
+      case RIGHT:
+        turnRight();
+        break;
+      case LEFT:
+        turnLeft();
+        break;
+      case TOWARDS_BIN: case TOWARDS_MINE: case default:
+        break; // in the correct position
+    }
+  }
+  if(oldDirection == TOWARDS_MINE){
+    switch(newDirection){
+      case RIGHT:
+        turnRight();
+        break;
+      case LEFT:
+        turnLeft();
+        break;
+      case TOWARDS_BIN: case TOWARDS_MINE: case default:
+        break; // in the correct position
+    }
+  }
+} // end of turn to position
+
+/*
+moves the robot froward one square distnace
+*/
+void PathFinder::moveForward(){
+  //contains the code to move forard from the ROS topic
+}
+
+/*
+Moves the robot backward. This should only be called
+on a TOWARDS_BIN state
+*/
+void PathFinder::moveBackward(){
+
+}
+
+/*
+Turns the robot to the right
+*/
+void PathFinder::turnRight(){
+
+}
+/*
+Turns the robot to the left
+*/
+void PathFinder::turnRight(){
+
 }
