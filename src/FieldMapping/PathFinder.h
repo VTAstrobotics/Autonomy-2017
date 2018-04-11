@@ -18,7 +18,7 @@ private:
   void moveBackward(); // will move teh robot backward .8 meters
   void turnRight(); // turns the robot 90 degrees to the right
   void turnLeft(); // turns the robot 90 degrees to the left
-  void turnToDirection(); // turns the robot to the correct Direction 
+  void turnToDirection(Direction dir1, Direction dir2); // turns the robot to the correct Direction
 
 public:
   PathFinder(); // constructor

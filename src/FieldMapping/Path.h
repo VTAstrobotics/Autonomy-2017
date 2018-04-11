@@ -1,5 +1,8 @@
 #include "AutonomyMap.h"
+#include "Map.h"
+#include "Robot.h"
 #include "Move.h"
+
 #ifndef PATH_H
 #define PATH_H
 

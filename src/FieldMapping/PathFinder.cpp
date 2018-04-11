@@ -21,7 +21,7 @@ void PathFinder::autonomyAlgorithm(){
 	//prime the loop
 	int miningCol = 0;
 	tempPath->createPath(miningCol, map, robot);
-	bestPath = tempPath;
+	bestPath = tempPath; // get the memory location for the first path
 	miningCol++;
 
 	// more mining paths to find
@@ -37,6 +37,9 @@ void PathFinder::autonomyAlgorithm(){
 		if(tempDistance < bestDistance){
 			bestPath = tempPath;
 		}
+    else{ // delete the memory
+      delete tempPath;
+    }
 
 		// go to the next miningCol
 		miningCol++;
@@ -163,6 +166,8 @@ moves the robot froward one square distnace
 */
 void PathFinder::moveForward(){
   //contains the code to move forard from the ROS topic
+  motor_command.rightRatio = forwardRatio;
+  motor_command.leftRatio = forwardRatio;
 }
 
 /*
@@ -170,18 +175,21 @@ Moves the robot backward. This should only be called
 on a TOWARDS_BIN state
 */
 void PathFinder::moveBackward(){
-
+  motor_command.rightRatio = backwardRatio;
+  motor_command.leftRatio = backwardRatio;
 }
 
 /*
-Turns the robot to the right
+Turns the robot to the right 90 degrees
 */
 void PathFinder::turnRight(){
-
+  motor_command.rightRatio = backwardRatio;
+  motor_command.leftRatio = forwardRatio;
 }
 /*
-Turns the robot to the left
+Turns the robot to the left 90 degrees
 */
 void PathFinder::turnLeft(){
-
+  motor_command.rightRatio = forwardRatio;
+  motor_command.leftRatio = backwardRatio;
 }

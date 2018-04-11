@@ -1,7 +1,7 @@
-#include"AutonomyMap.h"
-#include"Robot.h"
 #ifndef MAP_H // check to make sure the header isn't included twice
 #define  MAP_H
+#include"AutonomyMap.h"
+#include"Robot.h"
 /*
 this class represents the map to be used in the AutonomyMap
 algorithm. Each index of the map represents 0.91 sq ft

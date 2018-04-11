@@ -1,4 +1,3 @@
-#include "AutonomyMap.h"
 #include "Path.h"
 
 /*
@@ -77,7 +76,7 @@ void Path::createPath(int miningCol, Map map, Robot robot){
     addMove((*newMove)); // adds the move to the vector
 
     //reprime
-    if(robotCol == miningCol){
+    if(robotCol == miningCol){ // we're where we need to be here
       inMiningField = true;
     }
   }

@@ -13,7 +13,7 @@ public:
   Robot(); // constructor to create Robot
   // accessor methods
   int getRow(); // represents the row
-  int getCol(); 
+  int getCol();
 
   // mutator methods
   void setRow(int xPos);
