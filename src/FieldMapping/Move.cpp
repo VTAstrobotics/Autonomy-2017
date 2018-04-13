@@ -1,3 +1,4 @@
+#include "AutonomyMap.h"
 #include "Move.h"
 
 Move::Move() : direction(NOT_DETERMINED){}

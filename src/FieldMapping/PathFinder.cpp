@@ -46,10 +46,8 @@ void PathFinder::autonomyAlgorithm(){
 	}
 
 	// run the best Path
-	runPath();
+  runPath();
 }
-
-
 /*
 iterates through the moves in the Path that bestPath
 points to. Uses the ROS motor Node to send the directions
@@ -192,4 +190,11 @@ Turns the robot to the left 90 degrees
 void PathFinder::turnLeft(){
   motor_command.rightRatio = forwardRatio;
   motor_command.leftRatio = backwardRatio;
+}
+
+/*
+Runs the path backwards. 
+*/
+void PathFinder::runBackwards(){
+  bestPath->end(); //
 }

@@ -98,7 +98,7 @@ Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map){
   int towardsRight = calcDistance(robotRow, robotCol-1, miningCol, map);
   int towardsLeft = calcDistance(robotRow+1, robotCol+1, miningCol, map);
 
-  // assume we will always
+  // assume we will always go towards the mine 
   if(towardsMine >= towardsBin && towardsMine >= towardsLeft && towardsBin >= towardsRight){
     robotRow++;
     return TOWARDS_MINE; // Direction enum to be returned

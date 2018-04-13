@@ -1,5 +1,5 @@
 #ifndef MAP_H // check to make sure the header isn't included twice
-#define  MAP_H
+#define MAP_H
 #include"AutonomyMap.h"
 #include"Robot.h"
 /*
