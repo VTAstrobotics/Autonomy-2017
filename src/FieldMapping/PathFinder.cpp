@@ -193,8 +193,83 @@ void PathFinder::turnLeft(){
 }
 
 /*
-Runs the path backwards. 
+Runs the path backwards. This will iterate through the best path in reverse
+and then create a path that is opposite the movements of the best path
 */
 void PathFinder::runBackwards(){
-  bestPath->end(); //
+  // create an iterator that starts at the end of the vector and moves forward
+  std::vector<Move>::reverse_iterator rit = bestPath->rbegin();
+  Path *reversePath = new Path;
+
+  // iterates through the vector backwards
+  for(; rit != bestPath->begin(); rit--){
+    Move thisMove; // create the move to be placed into the new vector
+
+    // set the move to the opposite of what
+    switch(rit->getDirection()){
+      case RIGHT:
+        thisMove.setDirection(LEFT);
+        break;
+      case LEFT:
+        thisMove.setDirection(RIGHT);
+        break;
+      case TOWARDS_BIN:
+        thisMove.setDirection(TOWARDS_MINE);
+        break;
+      case TOWARDS_MINE:
+        thisMove.setDirection(TOWARDS_BIN);
+        break;
+      default:
+        break;
+    }
+    // add the move to the reverse path
+    reversePath->addMove(thisMove);
+  }
+
+  // get the path and create move pointer
+  vector<Move> path = reversePath->getPath();
+
+  // create a move object and set the robot towards bin
+  Move lastMove = Move;
+  lastMove.setDirection(TOWARDS_BIN);
+  Move thisMove;
+
+  // run through each move
+  for(int movement = 0; movement < bestPath->size(); movement++){
+    // get the move and direction, update last move for comparison
+    thisMove = path[movement]; // get the move object
+
+    Direction moveDirection = thisMove.getDirection();
+
+    // orient in the correct direction and move forward
+    switch(moveDirection){
+      // determine what the last case was relative to this case
+      // and make a proper decision on rotation of robot and
+      // movement direction
+      case RIGHT:
+        turnToDirection(lastMove.getDirection(), moveDirection);
+        moveForward();
+        break;
+      case LEFT:
+        turnToDirection(lastMove.getDirection(), moveDirection);
+        moveForward();
+        break;
+      case TOWARDS_MINE:
+        turnToDirection(lastMove.getDirection(), moveDirection);
+        moveForward();
+        break;
+      case TOWARDS_BIN: // will face towards the mine but go in reverse
+        turnToDirection(lastMove.getDirection(), moveDirection);
+        moveBackward();
+        break;
+      case NOT_DETERMINED: default:
+        // some error handling case
+        break;
+    }
+    // reprime the last move
+    lastMove = thisMove;
+  }
+
+ // delete the path from memory
+ delete reversePath;
 }
