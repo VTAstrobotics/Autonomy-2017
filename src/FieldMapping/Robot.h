@@ -1,6 +1,6 @@
-#include "AutonomyMap.h"
 #ifndef ROBOT_H
 #define ROBOT_H
+#include "AutonomyMap.h"
 
 class Robot{
 private:

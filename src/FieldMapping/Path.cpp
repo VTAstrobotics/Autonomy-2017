@@ -21,7 +21,7 @@ the index in the mining column
 */
 double calcDistance(int robotRow, int robotCol, int mineCol, Map map){
   // check to see if the move is valid
-  if(robotRow < 0 || robotRow > 9 robotCol < 0 || robotCol > 4 ){
+  if(robotRow < 0 || robotRow > 9 || robotCol < 0 || robotCol > 4 ){
     return 10000000; // this is not a valid position so make it a large number
   }
   // check to see if the move has an obstacle
@@ -64,7 +64,7 @@ Creats the path towards a specific miningCol on the field.
 */
 void Path::createPath(int miningCol, Map map, Robot robot){
   // prime the variables used in the loop
-  boolean inMiningField = false; // used to see if the robot is in the mining field
+  bool inMiningField = false; // used to see if the robot is in the mining field
   int robotCol = robot.getCol();
   int robotRow = robot.getRow();
 
@@ -93,12 +93,12 @@ that should be taken and updates the robot row and robot col based on the direct
 @return a Direction enum which will be set to the direction of the nextMove
 */
 Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map){
-  int towrdsBin = calcDistance(robotRow-1, robotCol, miningCol, map);
-  int towardsMine = calcDistance(robotRow+1, robotCol, miningCol, map);
-  int towardsRight = calcDistance(robotRow, robotCol-1, miningCol, map);
-  int towardsLeft = calcDistance(robotRow+1, robotCol+1, miningCol, map);
+  double towardsBin = calcDistance(robotRow-1, robotCol, miningCol, map);
+  double towardsMine = calcDistance(robotRow+1, robotCol, miningCol, map);
+  double towardsRight = calcDistance(robotRow, robotCol-1, miningCol, map);
+  double towardsLeft = calcDistance(robotRow+1, robotCol+1, miningCol, map);
 
-  // assume we will always go towards the mine 
+  // assume we will always go towards the mine
   if(towardsMine >= towardsBin && towardsMine >= towardsLeft && towardsBin >= towardsRight){
     robotRow++;
     return TOWARDS_MINE; // Direction enum to be returned
@@ -107,7 +107,7 @@ Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map){
     robotCol--;
     return RIGHT; // Direction enum
   }
-  else if(towardsLeft > towardsMine && towardsLeft > towardsRight && towardsLeft >= towrdsBin){
+  else if(towardsLeft > towardsMine && towardsLeft > towardsRight && towardsLeft >= towardsBin){
     robotCol++;
     return LEFT; // Direction enum
   }

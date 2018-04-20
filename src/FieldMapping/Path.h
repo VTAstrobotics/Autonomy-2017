@@ -1,10 +1,10 @@
+#ifndef PATH_H
+#define PATH_H
+
 #include "AutonomyMap.h"
 #include "Map.h"
 #include "Robot.h"
 #include "Move.h"
-
-#ifndef PATH_H
-#define PATH_H
 
 /**
 this class will contain a series of moves which will constitue
@@ -15,12 +15,13 @@ private:
   vector<Move> thisPath; // creates a vector of moves
 
   // helper methods
-  void calcDistance(int robotRow, int robotCol, int mineCol);
+  double calcDistance(int robotRow, int robotCol, int mineCol,  Map map);
   void addMove(Move aMove); // adds a move to the path
 
 public:
   Path(); // constructor for class
-  void createPath(int miningCol); // create the best path to the position
+  void createPath(int miningCol, Map map, Robot robot); // create the best path to the position
+  Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map);
 
   // accessor methods
   vector<Move> getPath();
