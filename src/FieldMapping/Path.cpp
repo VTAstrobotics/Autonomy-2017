@@ -50,7 +50,8 @@ path filled with moves
 
 @return a vector object filled with Move objects
 */
-vector<Move> Path::getPath(){
+// Note: returning const reference because otherwise it will copy the whole vector
+const vector<Move>& Path::getPath(){
   this->thisPath.shrink_to_fit();   // removes the unecessary space
   return this->thisPath;
 }

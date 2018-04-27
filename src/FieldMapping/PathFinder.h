@@ -1,4 +1,9 @@
 #include "AutonomyMap.h"
+#include "Path.h"
+#include "Move.h"
+#include "Map.h"
+#include "Robot.h"
+
 #ifndef PATHFINDER_H
 #define PATHFINDER_H
 
@@ -14,6 +19,7 @@ private:
   Path *bestPath; // represent the most optimal path to take
   Path *tempPath; // temporary path that we are creating
   void runPath(); // this will get the robot to run the best path
+  void runBackwards();
   void moveForward(); // will move the robot forward .8 meters
   void moveBackward(); // will move teh robot backward .8 meters
   void turnRight(); // turns the robot 90 degrees to the right
