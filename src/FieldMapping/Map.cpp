@@ -2,7 +2,6 @@
 
 // creates constructor for the class
 Map::Map(Robot& robot){
-
   // initialize the array to all spaces
   for(int row = 0; row < ROWS; row++){
     for(int col = 0; col < COLS; col++){
@@ -10,8 +9,16 @@ Map::Map(Robot& robot){
     }
   }
 
-  // place the robot on the Map
-  //map[robot.getX()][robot.getY()] = robot.getSymbol();
+  // create the map, here I have the array as a vector so this needs to be changed
+  // based on how you read it in
+  for(int index = 0; index < arrayMsg.length(); index++){
+    // this obstacle is greater than our allowed height
+    if(arrayMsg[index] > 20){
+       // defines an obstacle and places it in the correct orientation on map
+      map[index % 4][index / 4] = this->obstacle;
+    }
+  }
+
   // get starting point of Robot to be used with path planning
   startRow = robot.getRow();
   startCol = robot.getCol();
