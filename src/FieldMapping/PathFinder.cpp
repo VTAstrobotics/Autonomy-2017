@@ -6,8 +6,8 @@ constructor that initializes the private member variables
 and sets the pointers to nullptr
 */
 PathFinder::PathFinder(){
-  this->robot = Robot robot;
-  this->map = Map map(thisRobot);
+  robot = Robot robot1;
+  map = Map map(robot1);
 
   bestPath = nullptr;
   tempPath = nullptr;

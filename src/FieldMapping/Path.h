@@ -16,12 +16,12 @@ private:
 
   // helper methods
   double calcDistance(int robotRow, int robotCol, int mineCol,  Map map);
-  void addMove(Move aMove); // adds a move to the path
 
 public:
   Path(); // constructor for class
   void createPath(int miningCol, Map map, Robot robot); // create the best path to the position
   Direction Path::nextMove(int &robotRow, int &robotCol, int miningCol, Map map);
+  void addMove(Move aMove); // adds a move to the path
 
   // accessor methods
   vector<Move> getPath();
