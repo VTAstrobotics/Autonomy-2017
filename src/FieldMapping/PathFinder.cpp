@@ -5,12 +5,18 @@
 constructor that initializes the private member variables
 and sets the pointers to nullptr
 */
+<<<<<<< HEAD
 PathFinder::PathFinder(){
   robot = Robot robot1;
   map = Map map(robot1);
 
   bestPath = nullptr;
   tempPath = nullptr;
+=======
+// Note: robot is automatically initialized, since it has an no-argument constructor
+//       robot will be initialized before map, since it was declared before map in the header file
+PathFinder::PathFinder() : map(robot), bestPath(nullptr), tempPath(nullptr) {
+>>>>>>> cae3900c763b4f91a1c64b3b7431ae43663c7fb0
 }
 
 /*
@@ -25,7 +31,7 @@ void PathFinder::autonomyAlgorithm(){
 	miningCol++;
 
 	// more mining paths to find
-	while(miningCol < COL){
+	while(miningCol < COLS){
 		tempPath = new Path; // create a new path object
 		tempPath->createPath(miningCol, map, robot);
 
@@ -58,12 +64,14 @@ void PathFinder::runPath(){
   vector<Move> path = bestPath->getPath();
 
   // create a move object and set the robot towards bin
-  Move lastMove = Move;
+  // c++ note: variables are initialized automatically when declared, no need to use =
+  //           the = operator is actually a copy operator in c++
+  Move lastMove;
   lastMove.setDirection(TOWARDS_BIN);
   Move thisMove;
 
   // run through each move
-  for(int movement = 0; movement < bestPath->size(); movement++){
+  for(int movement = 0; movement < bestPath->getPath().size(); movement++){
     // get the move and direction, update last move for comparison
     thisMove = path[movement]; // get the move object
 
@@ -116,7 +124,7 @@ void PathFinder::turnToDirection(Direction oldDirection, Direction newDirection)
       case TOWARDS_MINE:
         turnRight();
         break;
-      case default: case LEFT:
+      case LEFT: default:
         break; // already in the correct position
     } // end of switch
   }
@@ -129,7 +137,7 @@ void PathFinder::turnToDirection(Direction oldDirection, Direction newDirection)
         turnLeft();
         turnLeft();
         break;
-      case RIGHT: case default:
+      case RIGHT: default:
         break; // in the correct position
     }
   }
@@ -141,7 +149,7 @@ void PathFinder::turnToDirection(Direction oldDirection, Direction newDirection)
       case LEFT:
         turnLeft();
         break;
-      case TOWARDS_BIN: case TOWARDS_MINE: case default:
+      case TOWARDS_BIN: case TOWARDS_MINE: default:
         break; // in the correct position
     }
   }
@@ -153,7 +161,7 @@ void PathFinder::turnToDirection(Direction oldDirection, Direction newDirection)
       case LEFT:
         turnLeft();
         break;
-      case TOWARDS_BIN: case TOWARDS_MINE: case default:
+      case TOWARDS_BIN: case TOWARDS_MINE: default:
         break; // in the correct position
     }
   }
@@ -198,11 +206,11 @@ and then create a path that is opposite the movements of the best path
 */
 void PathFinder::runBackwards(){
   // create an iterator that starts at the end of the vector and moves forward
-  std::vector<Move>::reverse_iterator rit = bestPath->rbegin();
+  std::vector<Move>::reverse_iterator rit = bestPath->getPath().rbegin();
   Path *reversePath = new Path;
 
   // iterates through the vector backwards
-  for(; rit != bestPath->begin(); rit--){
+  for(; rit != bestPath->getPath().rend(); rit--){
     Move thisMove; // create the move to be placed into the new vector
 
     // set the move to the opposite of what
@@ -230,12 +238,12 @@ void PathFinder::runBackwards(){
   vector<Move> path = reversePath->getPath();
 
   // create a move object and set the robot towards bin
-  Move lastMove = Move;
+  Move lastMove;
   lastMove.setDirection(TOWARDS_BIN);
   Move thisMove;
 
   // run through each move
-  for(int movement = 0; movement < bestPath->size(); movement++){
+  for(int movement = 0; movement < bestPath->getPath().size(); movement++){
     // get the move and direction, update last move for comparison
     thisMove = path[movement]; // get the move object
 

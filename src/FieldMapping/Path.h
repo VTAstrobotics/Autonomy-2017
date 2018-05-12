@@ -24,7 +24,7 @@ public:
   void addMove(Move aMove); // adds a move to the path
 
   // accessor methods
-  vector<Move> getPath();
+  const vector<Move>& getPath();
   int getPathDistance(); // returns the distance of path
 
 };

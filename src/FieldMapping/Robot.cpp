@@ -2,8 +2,8 @@
 
 Robot::Robot(){
   // set the x and y posisition to default value 10
-  this->xPos = 10;
-  this->yPos = 10;
+  this->xPos = 2;
+  this->yPos = 2;
 }
 
 /**
