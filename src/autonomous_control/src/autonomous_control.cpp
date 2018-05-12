@@ -75,6 +75,8 @@ namespace autonomous_control{
 		liftLowerLimit = 150;
 		liftUpperLimit = 50;
 
+		PathFinder path(); // this will create the path object that we will use
+
 		//ros::Duration(3.0).sleep();
 		ROS_DEBUG_ONCE("Starting Autonomous Control");
 
@@ -447,6 +449,10 @@ namespace autonomous_control{
 				//prevState = state;
 				updateIMU();
 				inObsField = true;
+				path->autonomyAlgorithm(); // this will create the best path and run the robot
+				prevState = state;
+				state = Mining;
+
 				/*if(posY < 5){
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = forwardRatio;
@@ -469,6 +475,7 @@ namespace autonomous_control{
 				}*/
 				// if imu slips more than 10 degrees from recored forward value, reorient
 				// if posx is more than 80 cm, recenter
+				/*
 				if(posY < 5){
 					motor_command.rightRatio = forwardRatio;
 					motor_command.leftRatio = forwardRatio;
@@ -498,6 +505,7 @@ namespace autonomous_control{
 					prevState = state;
 					state = Mining;
 				}
+				*/
 			break;
 
 
@@ -549,7 +557,7 @@ namespace autonomous_control{
 			break;
 
 			case ReturnToObs:
-				if(posY > 4.44){
+				/*if(posY > 4.44){
 					motor_command.rightRatio = backwardRatio;
 					motor_command.leftRatio = backwardRatio;
 				}
@@ -557,6 +565,9 @@ namespace autonomous_control{
 					halt();
 					state = ReturnToBin;
 				}
+				*/
+				path->runBackwards();
+				state = ReturnToBin;
 			break;
 
 			case ReturnToBin:
